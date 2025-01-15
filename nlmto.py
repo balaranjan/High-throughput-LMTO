@@ -296,7 +296,7 @@ def run_lmbnd():
 
 
 def run_lmto(**kwargs):
-    os.chdir("/home/bala/research/1_LMTO/lmto_script")
+    os.chdir(kwargs['calc_path'])
     """
     Run the steps to perform an LMTO calculation.
      1. Write INIT file and run lminit.run to initialize CTRL and CBAK files.
@@ -314,7 +314,7 @@ def run_lmto(**kwargs):
     print(f"\tName: {kwargs['name']}")
     
     # create dir
-    name = f"lmto_tests/{kwargs['name']}"
+    name = f"{kwargs['name']}"
 
     if name is not None:
         try:
@@ -417,8 +417,9 @@ def run_lmto(**kwargs):
     
     if not (error_init or error_hart or error_ovl or error_es or error_str or
             not_converged or error_dos or error_bnd):
+        pass
         # shutil.rmtree(os.getcwd())
-        shutil.move(os.getcwd(), "/home/bala/research/1_LMTO/lmto_script/lmto_tests/noi/")
+        # shutil.move(os.getcwd(), "/home/bala/research/1_LMTO/lmto_script/lmto_tests/noi/")
     else:
         print(f"{kwargs['name']} failed")
         print(dict(zip(['init', 'hart', 'ovl', 'es', 'str', 'lm', 'dos', 'band'], 
