@@ -18,3 +18,8 @@ The steps to perform an LMTO calculation.
 8. Perform DOS calculation and extract total DOS and partial DOS for each element in the system.
 
 This an ongoing development, expect frequent changes.
+
+Requirements
+1. Pexpect
+2. Pandas
+3. Numpy
