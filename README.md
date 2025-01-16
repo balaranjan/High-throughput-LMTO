@@ -18,9 +18,9 @@ The steps to perform an LMTO calculation.
 8. Perform DOS calculation and extract total DOS and partial DOS for each element in the system.
 
 Hf, Lanthanides, and Actinides
-a. All lanthanides are substituted with La and their 4f orbitals are downfolded.
-b. All actinides are substituted with Th and and their 5f orbitals are downfolded. 
-c. Hf is replaced with Zr.
+- All lanthanides are substituted with La and their 4f orbitals are downfolded.
+- All actinides are substituted with Th and and their 5f orbitals are downfolded. 
+- Hf is replaced with Zr.
 
 Requirements
 1. numpy==2.2.1
