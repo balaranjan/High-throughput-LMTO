@@ -5,7 +5,7 @@
 
 This is a package to automate the steps involved in performing LMTO calculations. The code will take a list of .cif files as input and for each structure in the list, an LMTO calculation will be performed including optimization, band structure calculation, and density of states calculation (DOS). The outputs from band structure and DOS calculation are saved as comma-separated (.csv) files.
 
-Outputs can be visualized using the following [plotter package](https://github.com/EmilJaffal/High-throughput-LMTO-plotter)
+Outputs can be visualized using the following [plotter package](https://github.com/EmilJaffal/High-throughput-LMTO-plotter).
 
 > The current README.md serves as a tutorial and documentation - last update January 16, 2025
 
@@ -41,7 +41,7 @@ The steps to perform an LMTO calculation are as follows:
 $ git clone https://github.com/balaranjan/High-throughput-LMTO
 $ cd High-throughput-LMTO
 $ pip install -r requirements.txt
-$ python main.py [foldername_containing_cif_files]
+$ python main.py [folder_containing_cif_files_in_High-throughput-LMTO_directory]/
 ```
 
 ## Contributors
