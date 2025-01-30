@@ -1,0 +1,24 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: High throughput LMTO
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Balaranjan
+    family-names: Selvaratnam
+    affiliation: City University of New York
+  - given-names: Emil
+    family-names: Jaffal
+    affiliation: City University of New York
+  - given-names: Anton
+    family-names: Oliynyk
+    affiliation: City University of New York
+identifiers:
+  - type: url
+    value: 'https://github.com/balaranjan/High-throughput-LMTO'
+repository-code: 'https://github.com/balaranjan/High-throughput-LMTO'
+license: MIT
