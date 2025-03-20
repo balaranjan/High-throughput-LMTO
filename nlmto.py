@@ -35,6 +35,7 @@ def write_INIT_file(**kwargs):
     
     """
     Write INIT file for LMTO calculation using cif data obtained from utils.extract_data_from_cif().
+    
     """
     
     atomic_numbers = {'H': 1, 'He': 2, 'Li': 3, 'Be': 4, 'B': 5, 'C': 6, 'N': 7, 'O': 8, 
@@ -45,16 +46,28 @@ def write_INIT_file(**kwargs):
                       'Rb': 37, 'Sr': 38, 'Y': 39, 'Zr': 40, 'Nb': 41, 'Mo': 42, 'Tc': 43, 
                       'Ru': 44, 'Rh': 45, 'Pd': 46, 'Ag': 47, 'Cd': 48, 'In': 49, 'Sn': 50, 
                       'Sb': 51, 'Te': 52, 'I': 53, 'Xe': 54, 'Cs': 55, 'Ba': 56, 'La': 57, 
-                      'Ce': 58, 'Pr': 59, 'Nd': 60, 'Pm': 61, 'Sm': 62, 'Eu': 63, 'Gd': 64, 
-                      'Tb': 65, 'Dy': 66, 'Ho': 67, 'Er': 68, 'Tm': 69, 'Yb': 70, 'Lu': 71, 
-                      'Hf': 72, 'Ta': 73, 'W': 74, 'Re': 75, 'Os': 76, 'Ir': 77, 'Pt': 78, 
+                      
+                    #   'Ce': 58, 'Pr': 59, 'Nd': 60, 'Pm': 61, 'Sm': 62, 'Eu': 63, 'Gd': 64, 
+                    #   'Tb': 65, 'Dy': 66, 'Ho': 67, 'Er': 68, 'Tm': 69, 'Yb': 70, 'Lu': 71, 
+                    
+                      'Ce': 57, 'Pr': 57, 'Nd': 57, 'Pm': 57, 'Sm': 57, 'Eu': 57, 'Gd': 57, 
+                      'Tb': 57, 'Dy': 57, 'Ho': 57, 'Er': 57, 'Tm': 57, 'Yb': 57, 'Lu': 57, 
+                      
+                      'Hf': 40, # 'Hf': 72, 
+                      
+                      'Ta': 73, 'W': 74, 'Re': 75, 'Os': 76, 'Ir': 77, 'Pt': 78, 
                       'Au': 79, 'Hg': 80, 'Tl': 81, 'Pb': 82, 'Bi': 83, 'Po': 84, 'At': 85, 
-                      'Rn': 86, 'Fr': 87, 'Ra': 88, 'Ac': 89, 'Th': 90, 'Pa': 91, 'U': 92, 
-                      'Np': 93, 'Pu': 94, 'Am': 95, 'Cm': 96, 'Bk': 97, 'Cf': 98, 'Es': 99, 
-                      'Fm': 100, 'Md': 101, 'No': 102, 'Lr': 103, 'Rf': 104, 'Db': 105, 
-                      'Sg': 106, 'Bh': 107, 'Hs': 108, 'Mt': 109, 'Ds': 110, 'Rg': 111, 
-                      'Cn': 112, 'Nh': 113, 'Fl': 114, 'Mc': 115, 'Lv': 116, 'Ts': 117, 
-                      'Og': 118}
+                      'Rn': 86, 'Fr': 87, 'Ra': 88, 'Ac': 89, 
+                      
+                    #   'Th': 90, 'Pa': 91, 'U': 92, 'Np': 93, 'Pu': 94, 'Am': 95, 'Cm': 96, 
+                    #   'Bk': 97, 'Cf': 98, 'Es': 99, 'Fm': 100, 'Md': 101, 'No': 102, 'Lr': 103, 
+                      
+                      'Th': 89, 'Pa': 89, 'U': 89, 'Np': 89, 'Pu': 89, 'Am': 89, 'Cm': 89, 
+                      'Bk': 89, 'Cf': 89, 'Es': 89, 'Fm': 89, 'Md': 89, 'No': 89, 'Lr': 89, 
+                      
+                      'Rf': 104, 'Db': 105, 'Sg': 106, 'Bh': 107, 'Hs': 108, 'Mt': 109, 
+                      'Ds': 110, 'Rg': 111, 'Cn': 112, 'Nh': 113, 'Fl': 114, 'Mc': 115, 
+                      'Lv': 116, 'Ts': 117, 'Og': 118}
     
     space_group_nums_params = {}
     
@@ -326,6 +339,7 @@ def run_lmto(**kwargs):
                 os.remove(f)
 
     error_init = run_lminit(**kwargs)[0]
+
     if error_init:
         print(f"{kwargs['name']} failed")
         return True
@@ -383,7 +397,7 @@ def run_lmto(**kwargs):
     
     etot_and_time = []
     not_converged, etot_t = run_lm(calc_type='first', num_atoms=kwargs['num_atoms'],
-                                          n_try_max=5)
+                                          n_try_max=15)
     etot_and_time.extend(etot_t)
     if not_converged:
         print(f"{kwargs['name']} failed")
@@ -417,8 +431,9 @@ def run_lmto(**kwargs):
     
     if not (error_init or error_hart or error_ovl or error_es or error_str or
             not_converged or error_dos or error_bnd):
-        pass
+        # pass
         # shutil.rmtree(os.getcwd())
+        print(f"{kwargs['name']} gracefully exited!")
         # shutil.move(os.getcwd(), "/home/bala/research/1_LMTO/lmto_script/lmto_tests/noi/")
     else:
         print(f"{kwargs['name']} failed")
@@ -451,7 +466,37 @@ def extract_scf_data(lm_output_filename, n_opt, natoms):
     
 
 if __name__ == "__main__":
+    
+    # run 1
+    cif = sys.argv[1]
+    cif_data = extract_data_from_cif(f"{cif}")
+    cif_data['calc_path'] = "/home/bala/research/1_LMTO/lmto_script"
+    run_lmto(**cif_data)
+    
+    exit(0)
+    
     import multiprocessing as mp
+    import functools
+    
+    def std_wrapper(func):
+        @functools.wraps(func)  # we need this to unravel the target function name
+        def caller(*args, **kwargs):  # and now for the wrapper, nothing new here
+            
+            from io import StringIO
+            import sys
+            sys.stdout, sys.stderr = StringIO(), StringIO()  # use our buffers instead
+            response = None  # in case a call fails
+            try:
+                response = func(*args, **kwargs)  # call our wrapped process function
+            except Exception as e:  # too broad but good enough as an example
+                print(e)  # NOTE: the exception is also printed to the captured STDOUT
+            # rewind our buffers:
+            sys.stdout.seek(0)
+            sys.stderr.seek(0)
+            # return everything packed as STDOUT, STDERR, PROCESS_RESPONSE | NONE
+            return sys.stdout.read(), sys.stderr.read(), response
+        return caller
+
     wd = "/home/bala/research/1_LMTO/lmto_script"    
 
     
@@ -464,13 +509,14 @@ if __name__ == "__main__":
     ]
     
     # MP
+    @std_wrapper
     def run_lmto_aux(*args):
         for arg in args:
             run_lmto(**arg)
             
     df = pd.read_csv("testfiles.csv")
     total = len(df)
-    cif_names = df['fname'].tolist()
+    cif_names = df['fname'].tolist() #[:1]
     tasks = []
     
     for i, cname in enumerate(cif_names, 0):
@@ -480,11 +526,44 @@ if __name__ == "__main__":
                 if cif in skip_cifs:
                     continue
                 cif_data = extract_data_from_cif(f"{wd}/not_prototype_CIFs/{cif}")
+                cif_data['calc_path'] = f"{wd}/lmto_tests"
                 tasks.append(cif_data)
     
     print(len(tasks))
-    with mp.Pool(processes=32) as p:
-        p.map(func=run_lmto_aux, iterable=tasks)
+    
+    pool = mp.Pool(processes=32)
+    for out, err, res in pool.imap_unordered(run_lmto_aux, tasks):
+        # print(out)
+        # get name 
         
-    p.close()
-    p.join()
+        lines = out.split("\n")
+        name = None
+        failed = True
+        for l in lines:
+            if "Name:" in l:
+                name = l.split("Name:")[-1].strip()
+                
+            if "gracefully exited!" in l:
+                fname = l.split()[0].strip()
+                failed = False
+                
+        if failed:
+            print(name)
+            out_fname = f"{wd}/lmto_tests/{name}/aout.txt"
+        else:
+            out_fname = f"{wd}/lmto_tests/noi/{name}/aout.txt"
+        
+        try:
+            with open(out_fname, 'w') as f:
+                f.write(out)
+        except:
+            print(out)
+            exit(0)
+                
+    pool.close()
+    
+    # with mp.Pool(processes=32) as p:
+    #     p.map(func=run_lmto_aux, iterable=tasks)
+        
+    # p.close()
+    # p.join()
