@@ -313,7 +313,7 @@ def extract_data_from_cif(path):
                 data['atom_site_data'] = site_data
                 
             ln += 1
-    print(data)
+    # print(data)
     data = dict(data)
     for k in ["#_database_code_PCD", "_cell_length_a", "_cell_length_b", "_cell_length_c", 
               "_cell_angle_alpha", "_cell_angle_beta", "_cell_angle_gamma",
@@ -336,7 +336,7 @@ def extract_data_from_cif(path):
     data['name'] = f"{data['_chemical_formula_sum']}-{data['#_database_code_PCD']}"
     data['num_atoms'] = int(data['_cell_formula_units_Z'][0]) * \
         sum(list(_parse_formula(data['_chemical_formula_sum']).values()))
-    print(data)
+    # print(data)
     return dict(data)
     
     
@@ -363,6 +363,7 @@ def format_sites(sites: str) -> list:
         # print(site)
         site[1] = change_map.get(site[1], site[1])
         site[1] = site[1].replace("+", "")
+        site[1] = site[1].replace("-", "")
         
         labels[site[1]] += 1
         if "Uani" in site or "Uiso" in site:
