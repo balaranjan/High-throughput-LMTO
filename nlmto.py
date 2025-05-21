@@ -358,7 +358,7 @@ def run_lmto(**kwargs):
         # set VERBOSE to 50
         n_try = 1
         print(f"\t\tVOLSPH_by_VOL={VOLSPH_by_VOL}, overlap={overlap}")
-        while VOLSPH_by_VOL is not None and VOLSPH_by_VOL < 100.0 and n_try < 10:
+        while VOLSPH_by_VOL is not None and VOLSPH_by_VOL < 100.0 and n_try < 30:
             print(f"\tRunning lmes.run and lmovl.run, iteration {n_try}")
             error_ctl = run_lmctl()
             if len(issues):
@@ -368,11 +368,11 @@ def run_lmto(**kwargs):
             error_es, VOLSPH_by_VOL = run_lmes(iteration=n_try)
             if not error_es:
                 error_ovl, VOLSPH_by_VOL, overlap, issues = run_lmovl(iteration=1+n_try)
-            
+
             if error_es or error_ovl:
                 break
             
-            # print(f"\t\tVOLSPH_by_VOL={VOLSPH_by_VOL}, overlap={overlap}")
+            print(f"\t\tVOLSPH_by_VOL={VOLSPH_by_VOL}, overlap={overlap}")
             n_try += 1
         if VOLSPH_by_VOL < 100.0:
             error_ovl = True
