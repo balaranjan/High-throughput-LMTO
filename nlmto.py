@@ -133,7 +133,6 @@ def write_INIT_file(**kwargs):
         for c in e:
             if c.isnumeric():
                 e = e.replace(c, "")
-    
         lines.append(f"          ATOM={site[0]:<3}  Z={atomic_numbers[e]:<3}   X={site[1]}\n")
             
     with open("INIT", 'w') as f:
