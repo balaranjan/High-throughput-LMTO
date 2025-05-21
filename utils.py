@@ -293,7 +293,8 @@ def extract_data_from_cif(path):
 
                     data[line.split()[0]] = line_data.strip().replace(';', '').replace(' ', '')
                 
-            if line.startswith('loop_') and lines[ln+1].lstrip().startswith('_atom_site'):
+            if line.startswith('loop_') and lines[ln+1].lstrip().startswith('_atom_site') \
+                and "aniso" not in lines[ln+1].lstrip():
                 site_data = []
                 keys = []
                 ln += 1
@@ -308,12 +309,16 @@ def extract_data_from_cif(path):
                 data['atom_site_data'] = site_data
                 
             ln += 1
-    
+    # print(data)
     data = dict(data)
     for k in ["#_database_code_PCD", "_cell_length_a", "_cell_length_b", "_cell_length_c", 
               "_cell_angle_alpha", "_cell_angle_beta", "_cell_angle_gamma",
               "_space_group_IT_number"]:
-        data[k] = data[k][0]
+        if k in data:
+            data[k] = get_float(data[k][0])
+        else:
+            if k == "#_database_code_PCD":
+                data[k] = 000
     data["_chemical_formula_sum"] = "".join(data["_chemical_formula_sum"]).replace("'", "")
     data["atom_site_data"] = format_sites(data["atom_site_data"])
     
@@ -327,6 +332,7 @@ def extract_data_from_cif(path):
     data['name'] = f"{data['_chemical_formula_sum']}-{data['#_database_code_PCD']}"
     data['num_atoms'] = int(data['_cell_formula_units_Z'][0]) * \
         sum(list(_parse_formula(data['_chemical_formula_sum']).values()))
+    
     return dict(data)
     
     
@@ -348,14 +354,27 @@ def format_sites(sites: str) -> list:
                   "Hf": "Zr"}
     
     for site in sites:
-
+        if "loop" in site[0].strip():
+            continue
+        # print(site)
         site[1] = change_map.get(site[1], site[1])
         site[1] = site[1].replace("+", "")
         
         labels[site[1]] += 1
-        formatted_sites.append([f"{site[1]}{labels[site[1]]}", ' '.join([str(float(p)) for p in site[4:7]])])
+        if "Uani" in site:
+            # Ge3 Ge 4 k 0.06789 0.19306 0.5 1
+            formatted_sites.append([f"{site[1]}{labels[site[1]]}", ' '.join([str(float(get_float(p))) for p in site[2:5]])])
+        else:
+            formatted_sites.append([f"{site[1]}{labels[site[1]]}", ' '.join([str(float(get_float(p))) for p in site[4:7]])])
         
     return formatted_sites
+
+
+def get_float(s):
+    if '(' in s:
+        ind = s.index('(')
+        return s[:ind]
+    return s
 
 
 def aborted(output):
