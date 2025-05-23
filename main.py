@@ -23,6 +23,7 @@ for i, cname in enumerate(cif_names, 0):
         if cif.endswith(".cif"):
             cif_data = extract_data_from_cif(f"{sys.argv[1]}{os.sep}{cif}")
             cif_data['calc_path'] = sys.argv[1]
+            cif_data['cif_path'] = f"{sys.argv[1]}{os.sep}{cif}"
             tasks.append(cif_data)
 
 with mp.Pool(processes=2) as p:

@@ -148,14 +148,19 @@ def write_ctrl(ctrl, **kwargs):
             elif block == "START" and param == "BEGMOM":
                 current_val = "F"
                 ctrl[block][1] = ctrl[block][1].replace("BEGMOM=F", f"BEGMOM={v}")
+            elif block == "COHP":
+                ctrl[block] = v # "\n".join(v)
             else:
                 current_val = ctrl[block][param]
                 ctrl[block][param] = f"{v}"
             # print(f"Setting {param} in {block} block from {current_val} to {v}.")
     
     max_len = len("CHARGE    LMTODAT=T ELF=F ADDCOR=F SPINDENS=F CHARWIN=F EMIN=-2 EMAX=2")
+
     with open("CTRL", "w") as f:
         for k, v in ctrl.items():
+            if k == "COHP":
+                print("cohp", type(v), v)
             if isinstance(v, dict):
                 block = ""
                 line = f"{k:<10}"
@@ -178,6 +183,7 @@ def write_ctrl(ctrl, **kwargs):
    
                 f.write(block)
             elif isinstance(v, str):
+                print(f"{k:<10}{v}")
                 f.write(f"{k:<10}{v}")
             else:
                 f.write(f"{k:<10}{v[0]}")
@@ -361,9 +367,13 @@ def format_sites(sites: str) -> list:
         if "loop" in site[0].strip():
             continue
         # print(site)
+        for ch in ["+", "-"]:
+            if ch in site[1]:
+                site[1] = site[1].replace(ch, "")
+
+        sform = _parse_formula(site[1])
+        site[1] = list(sform.keys())[0]
         site[1] = change_map.get(site[1], site[1])
-        site[1] = site[1].replace("+", "")
-        site[1] = site[1].replace("-", "")
         
         labels[site[1]] += 1
         if "Uani" in site or "Uiso" in site:
@@ -574,19 +584,60 @@ def get_band_structure(name):
     df_dos.to_csv(f"band_structure.csv", index=False)
 
 
-if __name__ == "__main__":
-    import os
-    f = "/home/aoliynyk/bala/lmto_script/lmto_tests/Mg2Si-1943984/output_lmovl_1.txt"
+
+def process_COHP():
+
+    p = pexpect.spawn("gnucohp.run", timeout=2)
+
+    p.expect("Enter output device:", timeout=2)
+    p.sendline("1")
+
+    p.expect("Energy unit is Rydberg", timeout=2)
+    p.sendline("t")
+
+    p.expect("energies relative to EF", timeout=2)
+    p.sendline("t")
+
+    p.expect("emin,emax", timeout=2)
+    p.sendline("/")
+
+    p.expect("Enter class of COHP", timeout=2)
+    p.sendline("/")
+
+    p.expect("Now enter weights for each COHP", timeout=2)
+    p.sendline("/")
+
+    p.expect("If desired, enter new min, max", timeout=2)
+    p.sendline("/")
+
+    p.expect("min/max for COHP", timeout=2)
+    p.sendline("/")
+
+    p.expect(" Plot also COHP integration", timeout=2)
+    p.sendline("t")
+
+    p.expect("if desired, enter new title", timeout=2)
+    p.sendline("/")
+
+    p.expect(pexpect.EOF)
+    return
+
+
+# if __name__ == "__main__":
+#     import os
+#     f = "/home/aoliynyk/bala/lmto_script/lmto_tests/Mg2Si-1943984/output_lmovl_1.txt"
     
-    print(find_issues(f))
+#     print(find_issues(f))
 
 
 
 if __name__ == "__main__":
+
     import os
-    f = "/home/aoliynyk/bala/lmto_script/lmto_tests/I-1220845"
+    f = "/home/lmto/nl/test/Ge12InRu4Y7-1537552"
     
     os.chdir(f)
-    ctrl = read_ctrl()
+    process_COHP()
+    # ctrl = read_ctrl()
     # write_ctrl(ctrl, **{'modify_SCALE_OMMAX1': 0.02})
     # print(ctrl['CLASS'])
