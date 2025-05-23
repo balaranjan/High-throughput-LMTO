@@ -341,7 +341,7 @@ def get_distances_from_cifkit(cifpath):
     cif.compute_connections()
 
     max_distances = defaultdict(dict)
-
+    # {site: {site1: d1, site2: d2, ...}, site2: {}, ...}
     conns = cif.connections
     for k, v in conns.items():
         cn = get_d_by_dmin_CN(v)
@@ -349,6 +349,7 @@ def get_distances_from_cifkit(cifpath):
         v = sorted([p[:2] for p in v], key=lambda x: x[1])[:cn]
         for _site in set([_v[0] for _v in v]):
             neigh_d_w_site_label = [_v[1] for _v in v if _v[0] == _site]
+            # print(k, _site, max(neigh_d_w_site_label), neigh_d_w_site_label)
             max_distances[k][_site] = max(neigh_d_w_site_label)
 
     return dict(max_distances)
@@ -356,7 +357,7 @@ def get_distances_from_cifkit(cifpath):
 
 def calc_COHPs(cifpath):
     ctrl = read_ctrl()
-
+    print("CLASS", ctrl['CLASS'])
     class_dict = defaultdict(list)
     sites = []
     atom_classes = [l for l in ctrl['CLASS'] if "IDMOD" not in l]
@@ -377,7 +378,7 @@ def calc_COHPs(cifpath):
 
             dimax = max_distances[site1].get(site2, None)
             if dimax is None:
-                print(f"{site1} and {site2} has no interaction coordination sphere...skipping")
+                print(f"{site1} {site2} no dist")
                 continue
 
             dimax *= 1.889
@@ -389,17 +390,36 @@ def calc_COHPs(cifpath):
                     
         # calculate
         modify_CTRL_file(set_DOS_EMIN=-1.1,
-                         set_DOS_EMAX=1.1,
+                        set_DOS_EMAX=1.1,
                          set_DOS_NOPTS=1800,
                          set_OPTIONS_COHP="T",
                          set_COHP_ALL=cohp)
+        
+
+        #modify_CTRL_file(set_OPTIONS_COHP="T")
+        #modify_CTRL_file(set_COHP_ALL=cohp)
 
         error = run_cohp(iteration=i)[0]
-    
+
+        _process_cohp = True
         if not error:
-            shutil.move(f"COHP", f"COHP_{i}")
+            shutil.copy(f"COHP", f"COHP_{i}")
+            with open(f"COHP_{i}", "r") as f:
+                line = ' '.join(f.readlines()[:5])
+
+                if "NUMBER OF COHPs=  0" in line:
+                    _process_cohp = False
+                
+                print(i, line, _process_cohp)
+                if _process_cohp:
+                    process_COHP()
         if os.path.isfile("DATA.COHP"):
             shutil.move(f"DATA.COHP", f"DATA.COHP_{i}")
+        #else:
+        #    return error
+
+        #if i==1:
+        #    exit(0)
 
     return error
 
@@ -411,15 +431,15 @@ def run_cohp(iteration):
     subprocess.call('lmincohp.run', stdout=output)
     
     error = aborted(lmincohp_output_filename)
-
+    error = False
     if not error:
-        error, _ = run_lm(calc_type=f'cohp{iteration}', num_atoms=1, n_try_max=2, get_etots=False)
+        error, _ = run_lm(calc_type=f'cohp{iteration}', num_atoms=1, n_try_max=5, get_etots=False)
 
     error = False
     if not error:
         lmcohp_output_filename = f'output_lmcohp_{iteration}.txt'
         output = open(lmcohp_output_filename, 'a')
-        subprocess.call('lmincohp.run', stdout=output)
+        subprocess.call('lmcohp.run', stdout=output)
         
         error = aborted(lmcohp_output_filename)
     error = False

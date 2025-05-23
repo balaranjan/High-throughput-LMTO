@@ -159,6 +159,8 @@ def write_ctrl(ctrl, **kwargs):
 
     with open("CTRL", "w") as f:
         for k, v in ctrl.items():
+            if k == "COHP":
+                print("cohp", type(v), v)
             if isinstance(v, dict):
                 block = ""
                 line = f"{k:<10}"
@@ -181,6 +183,7 @@ def write_ctrl(ctrl, **kwargs):
    
                 f.write(block)
             elif isinstance(v, str):
+                print(f"{k:<10}{v}")
                 f.write(f"{k:<10}{v}")
             else:
                 f.write(f"{k:<10}{v[0]}")
@@ -581,6 +584,45 @@ def get_band_structure(name):
     df_dos.to_csv(f"band_structure.csv", index=False)
 
 
+
+def process_COHP():
+
+    p = pexpect.spawn("gnucohp.run", timeout=2)
+
+    p.expect("Enter output device:", timeout=2)
+    p.sendline("1")
+
+    p.expect("Energy unit is Rydberg", timeout=2)
+    p.sendline("t")
+
+    p.expect("energies relative to EF", timeout=2)
+    p.sendline("t")
+
+    p.expect("emin,emax", timeout=2)
+    p.sendline("/")
+
+    p.expect("Enter class of COHP", timeout=2)
+    p.sendline("/")
+
+    p.expect("Now enter weights for each COHP", timeout=2)
+    p.sendline("/")
+
+    p.expect("If desired, enter new min, max", timeout=2)
+    p.sendline("/")
+
+    p.expect("min/max for COHP", timeout=2)
+    p.sendline("/")
+
+    p.expect(" Plot also COHP integration", timeout=2)
+    p.sendline("t")
+
+    p.expect("if desired, enter new title", timeout=2)
+    p.sendline("/")
+
+    p.expect(pexpect.EOF)
+    return
+
+
 # if __name__ == "__main__":
 #     import os
 #     f = "/home/aoliynyk/bala/lmto_script/lmto_tests/Mg2Si-1943984/output_lmovl_1.txt"
@@ -590,11 +632,12 @@ def get_band_structure(name):
 
 
 if __name__ == "__main__":
-    print(_parse_formula("B3"))
-    # import os
-    # f = "/home/aoliynyk/bala/lmto_script/lmto_tests/I-1220845"
+
+    import os
+    f = "/home/lmto/nl/test/Ge12InRu4Y7-1537552"
     
-    # os.chdir(f)
+    os.chdir(f)
+    process_COHP()
     # ctrl = read_ctrl()
     # write_ctrl(ctrl, **{'modify_SCALE_OMMAX1': 0.02})
     # print(ctrl['CLASS'])
