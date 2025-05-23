@@ -8,6 +8,8 @@ import pandas as pd
 from typing import Any
 from collections import defaultdict
 from utils import *
+from utils import _parse_formula
+from cifkit import Cif
 import shutil
 
 
@@ -257,7 +259,7 @@ def run_lmstr(iteration):
 
 
 @print_to_console
-def run_lm(calc_type, num_atoms, n_try_max=5):
+def run_lm(calc_type, num_atoms, n_try_max=5, get_etots=True):
     
     converged = False
     n_try = 1
@@ -270,15 +272,19 @@ def run_lm(calc_type, num_atoms, n_try_max=5):
 
         subprocess.run('lm.run', stdout=output, stderr=output)
         t = f"{time.time() - t0:.1f}"
-        
-        etot = extract_scf_data(lm_output_filename, n_try, natoms=num_atoms)
+
+        if get_etots:
+            etot = extract_scf_data(lm_output_filename, n_try, natoms=num_atoms)
         with open(lm_output_filename, 'r') as f:
             converged = "Jolly good show!" in f.read()
-            
-        etot_and_time.append({
-            'Type': 'first optimization', 'Iteration': n_try,
-            'converged': converged, 'ETOT (eV)': etot, 'Eime (s)': t
-        })
+
+        if get_etots:
+            etot_and_time.append({
+                'Type': 'first optimization', 'Iteration': n_try,
+                'converged': converged, 'ETOT (eV)': etot, 'Eime (s)': t
+            })
+        else:
+            etot_and_time = []
         n_try += 1
         
     return [not converged, etot_and_time]
@@ -304,6 +310,119 @@ def run_lmbnd():
     subprocess.call('lmbnd.run', stdout=output)
     
     error = aborted(lmbnd_output_filename)
+    return [error]
+
+
+def get_element(s):
+    s = _parse_formula(s)
+    return list(s.keys())[0]
+
+
+def get_d_by_dmin_CN(v):
+    
+    points_wd =[[p[3], p[1], p[0]] for p in v]
+    
+    # sort
+    points_wd = sorted(points_wd, key=lambda x: x[1])[:20]
+    distances = np.array([p[1] for p in points_wd])
+    distances /= distances.min()
+
+    gaps = np.array([distances[i] - distances[i-1] for i in range(1, len(distances))])
+    ind_gaps = np.argsort(gaps)
+    
+    inner_gap_index = np.array(ind_gaps[::-1])
+    outer_CN = int(inner_gap_index[0]) + 1
+
+    return outer_CN
+
+
+def get_distances_from_cifkit(cifpath):
+    cif = Cif(cifpath)
+    cif.compute_connections()
+
+    max_distances = defaultdict(dict)
+
+    conns = cif.connections
+    for k, v in conns.items():
+        cn = get_d_by_dmin_CN(v)
+        
+        v = sorted([p[:2] for p in v], key=lambda x: x[1])[:cn]
+        for _site in set([_v[0] for _v in v]):
+            neigh_d_w_site_label = [_v[1] for _v in v if _v[0] == _site]
+            max_distances[k][_site] = max(neigh_d_w_site_label)
+
+    return dict(max_distances)
+        
+
+def calc_COHPs(cifpath):
+    ctrl = read_ctrl()
+
+    class_dict = defaultdict(list)
+    sites = []
+    atom_classes = [l for l in ctrl['CLASS'] if "IDMOD" not in l]
+    for i, c in enumerate(atom_classes, 1):
+        site = c.split('=')[1].split()[0].strip()
+        el = get_element(site)
+        class_dict[el].append(site)
+        sites.append([site, i])
+
+    max_distances = get_distances_from_cifkit(cifpath)
+
+    # CLASS1=1 CLASS2=1 DIMIN=.5 DIMAX=.6 
+    for i in range(len(sites)):
+        site1, class_num1 = sites[i]
+        class_pairs = []
+        for j in range(i, len(sites)):
+            site2, class_num2 = sites[j]
+
+            dimax = max_distances[site1].get(site2, None)
+            if dimax is None:
+                print(f"{site1} and {site2} has no interaction coordination sphere...skipping")
+                continue
+
+            dimax *= 1.889
+            class_pairs.append(f"CLASS1={class_num1} CLASS2={class_num2} DIMIN=0.5 DIMAX={dimax:.0f} \n")
+
+
+        cohp = [ctrl['COHP'][0]]
+        cohp.extend(class_pairs)
+                    
+        # calculate
+        modify_CTRL_file(set_DOS_EMIN=-1.1,
+                         set_DOS_EMAX=1.1,
+                         set_DOS_NOPTS=1800,
+                         set_OPTIONS_COHP="T",
+                         set_COHP_ALL=cohp)
+
+        error = run_cohp(iteration=i)[0]
+    
+        if not error:
+            shutil.move(f"COHP", f"COHP_{i}")
+        if os.path.isfile("DATA.COHP"):
+            shutil.move(f"DATA.COHP", f"DATA.COHP_{i}")
+
+    return error
+
+
+@print_to_console
+def run_cohp(iteration):
+    lmincohp_output_filename = f'output_lmincohp_{iteration}.txt'
+    output = open(lmincohp_output_filename, 'a')
+    subprocess.call('lmincohp.run', stdout=output)
+    
+    error = aborted(lmincohp_output_filename)
+
+    if not error:
+        error, _ = run_lm(calc_type=f'cohp{iteration}', num_atoms=1, n_try_max=2, get_etots=False)
+
+    error = False
+    if not error:
+        lmcohp_output_filename = f'output_lmcohp_{iteration}.txt'
+        output = open(lmcohp_output_filename, 'a')
+        subprocess.call('lmincohp.run', stdout=output)
+        
+        error = aborted(lmcohp_output_filename)
+    error = False
     return [error]
 
 
@@ -427,19 +546,22 @@ def run_lmto(**kwargs):
         print(f"{kwargs['name']} failed")
         return True
     get_band_structure(kwargs['name'].split('-')[0])
+
+    # COHP
+    error_cohp = calc_COHPs(kwargs['cif_path'])
     
     if not (error_init or error_hart or error_ovl or error_es or error_str or
-            not_converged or error_dos or error_bnd):
+            not_converged or error_dos or error_bnd or error_cohp):
         # pass
         # shutil.rmtree(os.getcwd())
         print(f"{kwargs['name']} gracefully exited!")
         # shutil.move(os.getcwd(), "/home/bala/research/1_LMTO/lmto_script/lmto_tests/noi/")
     else:
         print(f"{kwargs['name']} failed")
-        print(dict(zip(['init', 'hart', 'ovl', 'es', 'str', 'lm', 'dos', 'band'], 
+        print(dict(zip(['init', 'hart', 'ovl', 'es', 'str', 'lm', 'dos', 'band', 'cohp'], 
                        [error_init , error_hart , error_ovl , error_es , error_str ,
-            not_converged , error_dos, error_bnd])))
-    return error_init or error_hart or error_ovl or error_es or error_str or not_converged or error_dos or error_bnd
+            not_converged , error_dos, error_bnd, error_cohp])))
+    return error_init or error_hart or error_ovl or error_es or error_str or not_converged or error_dos or error_bnd or error_cohp
 
 
 def extract_scf_data(lm_output_filename, n_opt, natoms):
@@ -465,7 +587,13 @@ def extract_scf_data(lm_output_filename, n_opt, natoms):
     
 
 if __name__ == "__main__":
-    
+
+    wd = "/home/lmto/nl/test/Ge12InRu4Y7-1537552"
+    os.chdir(wd)
+    calc_COHPs("/home/lmto/nl/test/1537552.cif")
+    # get_distances_from_cifkit("/home/bala/Documents/22_lmto/High-throughput-LMTO/Cr4AlB4.cif")
+    exit(0)
+
     # run 1
     cif = sys.argv[1]
     cif_data = extract_data_from_cif(f"{cif}")
