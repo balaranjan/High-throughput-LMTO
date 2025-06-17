@@ -1,6 +1,7 @@
 __pycache__/
 test/
 .DS_Store
+tests/calcs/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
