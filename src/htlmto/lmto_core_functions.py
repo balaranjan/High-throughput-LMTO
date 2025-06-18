@@ -244,7 +244,7 @@ def calc_COHPs(cifpath):
 
         site1, class_num1 = element_sites[i]
         str_site1 = f"{site1}({class_num1})"
-        print(f"\t\tCOHP_{i:<2} is for {element}.")
+        print(f"\t\tCOHP_{element:<2}.")
         class_pairs = []
 
         for j in range(len(element_sites)):
@@ -314,16 +314,16 @@ def calc_COHPs(cifpath):
                 set_COHP_ALL=cohp,
             )
 
-            shutil.copy("CTRL", f"COHP_BAK_CTRL_{i}")
+            shutil.copy("CTRL", f"COHP_BAK_CTRL_{element}")
 
             error, no_cohp_found = run_cohp(iteration=i)
 
             if not error and not no_cohp_found:
-                shutil.copy("COHP", f"COHP_{i}")
+                shutil.copy("COHP", f"COHP_{element}")
                 process_COHP()
 
                 if os.path.isfile("DATA.COHP"):
-                    shutil.move("DATA.COHP", f"DATA.COHP_{i}")
+                    shutil.move("DATA.COHP", f"DATA.COHP_{element}")
 
     return error
 
