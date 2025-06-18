@@ -262,12 +262,14 @@ def calc_COHPs(cifpath):
             set_COHP_ALL=cohp,
         )
 
+        shutil.copy("CTRL", f"COHP_BAK_CTRL_{i}_{j}")
+
         # modify_CTRL_file(set_OPTIONS_COHP="T")
         # modify_CTRL_file(set_COHP_ALL=cohp)
 
         error, no_cohp_found = run_cohp(iteration=i)
 
-        if not error and no_cohp_found:
+        if not error and not no_cohp_found:
             shutil.copy("COHP", f"COHP_{i}")
             process_COHP()
 
@@ -297,7 +299,7 @@ def run_cohp(iteration):
         # no COHP found
         return error, True
 
-    if not error and no_cohp_found:
+    if not error and not no_cohp_found:
         error, _ = run_lm(
             calc_type=f"cohp{iteration}",
             num_atoms=1,

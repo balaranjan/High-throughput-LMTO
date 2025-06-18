@@ -40,7 +40,9 @@ import os
 def main():
 
     description = """
-        A HT LMTO
+        A High Throughput LMTO Calculator.
+
+        This code automates the LMTO calculations using TB-LMTO program.
 
         """
     parser = argparse.ArgumentParser(
