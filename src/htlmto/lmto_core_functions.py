@@ -252,18 +252,30 @@ def calc_COHPs(cifpath):
             if not len(element2_sites):
                 continue
 
-            print(f"\t\tCalculating COHP for {element1:<2} and {element2:<2}.")
+            print(
+                f"\n\t\tCalculating COHP for {element1:<2} and {element2:<2}"
+            )
             class_pairs = []
-
+            added_pairs = []
             for site1, class_num1 in element1_sites:
                 str_site1 = f"{site1}({class_num1})"
 
                 for site2, class_num2 in element2_sites:
                     str_site2 = f"{site2}({class_num2})"
 
-                    dimax = max_distances[site1].get(site2, None)
+                    if site1 != site2:
+                        s_pair = "-".join(sorted(site1, site2))
+                        if s_pair in added_pairs:
+                            continue
+                        else:
+                            added_pairs.append(s_pair)
 
-                    if dimax is None:
+                    dimax = max(
+                        max_distances[site1].get(site2, -1),
+                        max_distances[site2].get(site1, -1),
+                    )
+
+                    if dimax == -1:
                         print(
                             f"\t\tPair: {str_site1:<6} and {str_site2:<6} \
                                 - no distance found."
@@ -281,61 +293,61 @@ def calc_COHPs(cifpath):
                                 DIMIN=0.5 DIMAX={dimax:.0f} \n"
                         )
 
-        # for i in range(len(sites)):
-        #     site1, class_num1 = sites[i]
-        #     class_pairs = []
+            # for i in range(len(sites)):
+            #     site1, class_num1 = sites[i]
+            #     class_pairs = []
 
-        #     str_site1 = f"{site1}({class_num1})"
-        #     print(f"\t\tCOHP_{i:<2} is for site(class) {str_site1}.")
-        #     for j in range(i, len(sites)):
-        #         site2, class_num2 = sites[j]
+            #     str_site1 = f"{site1}({class_num1})"
+            #     print(f"\t\tCOHP_{i:<2} is for site(class) {str_site1}.")
+            #     for j in range(i, len(sites)):
+            #         site2, class_num2 = sites[j]
 
-        #         dimax = max_distances[site1].get(site2, None)
-        #         str_site2 = f"{site2}({class_num2})"
+            #         dimax = max_distances[site1].get(site2, None)
+            #         str_site2 = f"{site2}({class_num2})"
 
-        #         if dimax is None:
-        #             print(
-        #                 f"\t\tPair: {str_site1:<6} and {str_site2:<6} \
-        #                     - no distance found."
-        #             )
-        #             continue
-        #         else:
-        #             print(
-        #                 f"\t\tPair: {str_site1:<6} and {str_site2:<6} \
-        #                     - {dimax:.4f}."
-        #             )
+            #         if dimax is None:
+            #             print(
+            #                 f"\t\tPair: {str_site1:<6} and {str_site2:<6} \
+            #                     - no distance found."
+            #             )
+            #             continue
+            #         else:
+            #             print(
+            #                 f"\t\tPair: {str_site1:<6} and {str_site2:<6} \
+            #                     - {dimax:.4f}."
+            #             )
 
-        #             dimax *= 1.889
-        #             class_pairs.append(
-        #                 f"CLASS1={class_num1} CLASS2={class_num2} \
-        #                     DIMIN=0.5 DIMAX={dimax:.0f} \n"
-        #             )
+            #             dimax *= 1.889
+            #             class_pairs.append(
+            #                 f"CLASS1={class_num1} CLASS2={class_num2} \
+            #                     DIMIN=0.5 DIMAX={dimax:.0f} \n"
+            #             )
 
-        if class_pairs:
-            cohp = [ctrl["COHP"][0]]
-            cohp.extend(class_pairs)
+            if class_pairs:
+                cohp = [ctrl["COHP"][0]]
+                cohp.extend(class_pairs)
 
-            # calculate
-            modify_CTRL_file(
-                set_DOS_EMIN=-1.1,
-                set_DOS_EMAX=1.1,
-                set_DOS_NOPTS=1800,
-                set_OPTIONS_COHP="T",
-                set_COHP_ALL=cohp,
-            )
+                # calculate
+                modify_CTRL_file(
+                    set_DOS_EMIN=-1.1,
+                    set_DOS_EMAX=1.1,
+                    set_DOS_NOPTS=1800,
+                    set_OPTIONS_COHP="T",
+                    set_COHP_ALL=cohp,
+                )
 
-            shutil.copy("CTRL", f"COHP_BAK_CTRL_{element1}_{element2}")
+                shutil.copy("CTRL", f"COHP_BAK_CTRL_{element1}_{element2}")
 
-            error, no_cohp_found = run_cohp(iteration=i)
+                error, no_cohp_found = run_cohp(iteration=i)
 
-            if not error and not no_cohp_found:
-                shutil.copy("COHP", f"COHP_{element1}_{element2}")
-                process_COHP()
+                if not error and not no_cohp_found:
+                    shutil.copy("COHP", f"COHP_{element1}_{element2}")
+                    process_COHP()
 
-                if os.path.isfile("DATA.COHP"):
-                    shutil.move(
-                        "DATA.COHP", f"DATA.COHP_{element1}_{element2}"
-                    )
+                    if os.path.isfile("DATA.COHP"):
+                        shutil.move(
+                            "DATA.COHP", f"DATA.COHP_{element1}_{element2}"
+                        )
 
     return error
 
