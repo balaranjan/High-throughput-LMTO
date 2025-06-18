@@ -1,2 +1,5 @@
-numpy
+numpy=2.2
 matplotlib
+pandas
+pexpect
+cifkit
