@@ -281,7 +281,7 @@ def calc_COHPs(cifpath):
                 set_COHP_ALL=cohp,
             )
 
-            shutil.copy("CTRL", f"COHP_BAK_CTRL_{i}_{j}")
+            shutil.copy("CTRL", f"COHP_BAK_CTRL_{i}")
 
             error, no_cohp_found = run_cohp(iteration=i)
 
