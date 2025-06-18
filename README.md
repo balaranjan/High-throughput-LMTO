@@ -50,10 +50,39 @@ pip list
 
 ## Run
 
-To get started, type
+To get help, type
 
 ```
 htlmto -h
+
+usage: htlmto [-h] [-n ] [--force-O2] input_path
+
+        A High Throughput LMTO Calculator.
+
+        This code automates the LMTO calculations using TB-LMTO program.
+
+
+
+positional arguments:
+  input_path        Path to the input file / folder
+
+options:
+  -h, --help        show this help message and exit
+  -n, --num-cores   Number of CPU cores to use.                         Default is 2.
+  --force-O2        Force origin choice 2
+
+```
+
+To run, type
+
+```
+htlmto my_structure.cif
+```
+
+or
+
+```
+htlmto my_directory_with_multiple_cifs
 ```
 
 The steps to perform an LMTO calculation are as follows:

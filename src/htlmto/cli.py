@@ -28,15 +28,16 @@ def main():
     )
     parser.add_argument("input_path", help="Path to the input file / folder")
     parser.add_argument(
-        "--force-O2", help="Force origin choice 2", action="store_true"
-    )
-    parser.add_argument(
         "-n",
         "--num-cores",
         help="Number of CPU cores to use. \
                         Default is 2.",
         type=int,
         default=2,
+        metavar="",
+    )
+    parser.add_argument(
+        "--force-O2", help="Force origin choice 2", action="store_true"
     )
 
     args = parser.parse_args()
