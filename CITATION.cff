@@ -19,6 +19,6 @@ authors:
     affiliation: City University of New York
 identifiers:
   - type: url
-    value: 'https://github.com/balaranjan/High-throughput-LMTO'
-repository-code: 'https://github.com/balaranjan/High-throughput-LMTO'
+    value: "https://github.com/balaranjan/High-throughput-LMTO"
+repository-code: "https://github.com/balaranjan/High-throughput-LMTO"
 license: MIT
