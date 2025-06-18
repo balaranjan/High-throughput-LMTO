@@ -265,9 +265,9 @@ def calc_COHPs(cifpath):
         # modify_CTRL_file(set_OPTIONS_COHP="T")
         # modify_CTRL_file(set_COHP_ALL=cohp)
 
-        error, error_cohp = run_cohp(iteration=i)[0]
+        error, no_cohp_found = run_cohp(iteration=i)
 
-        if not error and error_cohp:
+        if not error and no_cohp_found:
             shutil.copy("COHP", f"COHP_{i}")
             process_COHP()
 
@@ -285,19 +285,19 @@ def run_cohp(iteration):
 
     error = aborted(lmincohp_output_filename)
 
-    process_cohp = True
+    no_cohp_found = False
     if not error:
         with open("COHP", "r") as f:
             line = " ".join(f.readlines()[:5])
 
             if "NUMBER OF COHPs=  0" in line:
-                process_cohp = False
+                no_cohp_found = True
 
-    if not process_cohp:
+    if no_cohp_found:
         # no COHP found
-        return True, True
+        return error, True
 
-    if not error and process_cohp:
+    if not error and no_cohp_found:
         error, _ = run_lm(
             calc_type=f"cohp{iteration}",
             num_atoms=1,
@@ -313,7 +313,7 @@ def run_cohp(iteration):
 
         error = aborted(lmcohp_output_filename)
     error = False
-    return [error, process_cohp]
+    return [error, no_cohp_found]
 
 
 def run_lmto(**kwargs):

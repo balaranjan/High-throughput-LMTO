@@ -8,6 +8,7 @@ def read_cif(filename, verbose=False):
 
     if not os.path.isfile(filename):
         print(f"File {filename} not found!")
+        return
 
     if verbose:
         print(filename, end="   ... ")
