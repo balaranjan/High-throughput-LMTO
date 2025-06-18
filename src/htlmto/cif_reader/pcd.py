@@ -80,7 +80,7 @@ class PCD_reader(CIF_Reader):
 
         for i, line in enumerate(self.lines[i_start + 1 :]):
             if line.startswith("_") and "atom_site" not in line:
-                i_end = i + i_start
+                i_end = i + i_start + 1
                 break
 
         values = self.lines[i_start:i_end]

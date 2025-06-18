@@ -92,7 +92,7 @@ class SXL_reader(CIF_Reader):
                 or line.startswith("#")
                 or line.startswith("loop_")
             ) and "atom_site" not in line:
-                i_end = i + i_start
+                i_end = i + i_start + 1
                 break
 
         values = self.lines[i_start:i_end]

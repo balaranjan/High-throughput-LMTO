@@ -231,8 +231,10 @@ def calc_COHPs(cifpath):
 
     max_distances = get_distances_from_cifkit(cifpath)
 
+    error = False
     print(f"\n\tSites for COHP calculation: {sites}")
     print("\tAvailable distances: ")
+
     for k, v in max_distances.items():
         print(f"\t\t{k:<3} : {v}")
 
@@ -248,6 +250,7 @@ def calc_COHPs(cifpath):
 
             dimax = max_distances[site1].get(site2, None)
             str_site2 = f"{site2}({class_num2})"
+
             if dimax is None:
                 print(
                     f"\t\tPair: {str_site1:<6} and {str_site2:<6} \
@@ -260,37 +263,34 @@ def calc_COHPs(cifpath):
                         - {dimax:.4f}."
                 )
 
-            dimax *= 1.889
-            class_pairs.append(
-                f"CLASS1={class_num1} CLASS2={class_num2} \
-                    DIMIN=0.5 DIMAX={dimax:.0f} \n"
+                dimax *= 1.889
+                class_pairs.append(
+                    f"CLASS1={class_num1} CLASS2={class_num2} \
+                        DIMIN=0.5 DIMAX={dimax:.0f} \n"
+                )
+        if class_pairs:
+            cohp = [ctrl["COHP"][0]]
+            cohp.extend(class_pairs)
+
+            # calculate
+            modify_CTRL_file(
+                set_DOS_EMIN=-1.1,
+                set_DOS_EMAX=1.1,
+                set_DOS_NOPTS=1800,
+                set_OPTIONS_COHP="T",
+                set_COHP_ALL=cohp,
             )
 
-        cohp = [ctrl["COHP"][0]]
-        cohp.extend(class_pairs)
+            shutil.copy("CTRL", f"COHP_BAK_CTRL_{i}_{j}")
 
-        # calculate
-        modify_CTRL_file(
-            set_DOS_EMIN=-1.1,
-            set_DOS_EMAX=1.1,
-            set_DOS_NOPTS=1800,
-            set_OPTIONS_COHP="T",
-            set_COHP_ALL=cohp,
-        )
+            error, no_cohp_found = run_cohp(iteration=i)
 
-        shutil.copy("CTRL", f"COHP_BAK_CTRL_{i}_{j}")
+            if not error and not no_cohp_found:
+                shutil.copy("COHP", f"COHP_{i}")
+                process_COHP()
 
-        # modify_CTRL_file(set_OPTIONS_COHP="T")
-        # modify_CTRL_file(set_COHP_ALL=cohp)
-
-        error, no_cohp_found = run_cohp(iteration=i)
-
-        if not error and not no_cohp_found:
-            shutil.copy("COHP", f"COHP_{i}")
-            process_COHP()
-
-            if os.path.isfile("DATA.COHP"):
-                shutil.move("DATA.COHP", f"DATA.COHP_{i}")
+                if os.path.isfile("DATA.COHP"):
+                    shutil.move("DATA.COHP", f"DATA.COHP_{i}")
 
     return error
 
