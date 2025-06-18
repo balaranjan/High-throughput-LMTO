@@ -215,7 +215,6 @@ def write_INIT_file(**kwargs):
     lines.append(first_ln)
 
     for site in kwargs["atom_site_data"]:
-        print(site)
         lines.append(
             f"          ATOM={site['label']:<3}  \
                 Z={atomic_numbers[site['symbol']]:<3}   \
@@ -396,8 +395,6 @@ def write_ctrl(ctrl, **kwargs):
                     new_val = round(float(current_val) + v, nround)
 
             ctrl[block][param] = new_val
-            # print(f"Modifying {param} in {block} block from
-            # {current_val} to {new_val}.")
 
         elif change_type == "set":
             if block == "CLASS":
@@ -409,7 +406,6 @@ def write_ctrl(ctrl, **kwargs):
                     atom, radius = atom.split("R=")
                     radius = radius.split()[0].strip()
                     atom = atom.split()[0].replace("ATOM=", "").strip()
-                    # print(atom, radius)
 
                     element = atom
                     for e in element:
@@ -420,7 +416,6 @@ def write_ctrl(ctrl, **kwargs):
                             f"R={radius}", f"R={v}"
                         )
 
-                    # print(i, atom, radius)
                 ctrl[block] = current_val
 
             elif block == "START" and param == "BEGMOM":
@@ -433,8 +428,6 @@ def write_ctrl(ctrl, **kwargs):
             else:
                 current_val = ctrl[block][param]
                 ctrl[block][param] = f"{v}"
-            # print(f"Setting {param} in {block} block from
-            # {current_val} to {v}.")
 
     max_len = 70
 
@@ -463,7 +456,7 @@ def write_ctrl(ctrl, **kwargs):
 
                 f.write(block)
             elif isinstance(v, str):
-                print(f"{k:<10}{v}")
+                # print(f"{k:<10}{v}")
                 f.write(f"{k:<10}{v}")
             else:
                 f.write(f"{k:<10}{v[0]}")
@@ -491,25 +484,9 @@ def format_sites(sites: str) -> list:
     change_map = {"D": "H", "Tl": "In", "Hf": "Zr"}
 
     for site in sites:
-        # if "loop" in site[0].strip():
-        #     continue
-        # # print(site)
-        # for ch in ["+", "-"]:
-        #     if ch in site[1]:
-        #         site[1] = site[1].replace(ch, "")
-
-        # sform = _parse_formula(site[1])
-        # site[1] = list(sform.keys())[0]
         site[1] = change_map.get(site[1], site[1])
 
         labels[site[1]] += 1
-        # if "Uani" in site or "Uiso" in site:
-        #     # Ge3 Ge 4 k 0.06789 0.19306 0.5 1
-        #     formatted_sites.append([f"{site[1]}{labels[site[1]]}",
-        #  ' '.join([str(float(get_float(p))) for p in site[2:5]])])
-        # else:
-        #     formatted_sites.append([f"{site[1]}{labels[site[1]]}",
-        # ' '.join([str(float(get_float(p))) for p in site[4:7]])])
 
         formatted_sites.append(
             [

@@ -15,24 +15,67 @@ Outputs can be visualized using the following [plotter package](https://github.c
 
 ## Getting started
 
+Here is a quick tutorial on how to locally install the package.
+
+## How to install `htlmto` locally
+
+`cd` into the project directory:
+
+```bash
+cd High-throughput-LMTO
+```
+
+Create and activate a new conda environment:
+
+```bash
+conda create -n lmto_env python=3.13
+conda activate lmto_env
+```
+
+### Install your package with dependencies sourced from pip
+
+It's simple. The only command required is the following:
+
+```bash
+pip install -e .
+```
+
+## Verify your package has been installed
+
+Verify the installation:
+
+```bash
+pip list
+```
+
+## Run
+
+To get started, type
+
+```
+htlmto -h
+```
+
 The steps to perform an LMTO calculation are as follows:
+
 1. Write the INIT file and run lminit.run to initialize CTRL and CBAK files.
 2. Run lmhart.run and get the VOLSPH_by_VOL
 3. If VOLSPH_by_VOL less than 100.0, then run lmes.run and lmovl.run iteratively.
-       At each iteration check the output of lmovl.run for errors, get recommended
-       changes (for RMAXS and OMMAX) based on the messages in the output file, and modify parameters in
-       the CTRL file accordingly.
-4. Run lmstr.run, check for recommended action in the output file if 
-       the run failed. Make the changes (for RMAXS and OMMAX) in CTRL file and run iteratively 
-       until lmstr.run finishes without errors.
+   At each iteration check the output of lmovl.run for errors, get recommended
+   changes (for RMAXS and OMMAX) based on the messages in the output file, and modify parameters in
+   the CTRL file accordingly.
+4. Run lmstr.run, check for recommended action in the output file if
+   the run failed. Make the changes (for RMAXS and OMMAX) in CTRL file and run iteratively
+   until lmstr.run finishes without errors.
 5. Run lm.run until it converges.
 6. Modify the number of KPOINTS (currently doubles) and optimize.
 7. Perform band structure calculation.
 8. Perform DOS calculation and extract total DOS and partial DOS for each element in the system.
 
 ### For Hf, Lanthanides, and Actinides
+
 - All lanthanides are substituted with La and their 4f orbitals are downfolded.
-- All actinides are substituted with Th and and their 5f orbitals are downfolded. 
+- All actinides are substituted with Th and and their 5f orbitals are downfolded.
 - Hf is replaced with Zr.
 
 ## Installation

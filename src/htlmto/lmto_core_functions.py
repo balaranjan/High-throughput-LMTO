@@ -201,7 +201,7 @@ def run_lmdos():
 
     lmdos_output_filename = "output_lmdos.txt"
     output = open(lmdos_output_filename, "a")
-    subprocess.call("lmdos.run", stdout=output)
+    subprocess.run("lmdos.run", stdout=output, stderr=output)
 
     error = aborted(lmdos_output_filename)
     return [error]
@@ -211,8 +211,7 @@ def run_lmdos():
 def run_lmbnd():
     lmbnd_output_filename = "output_lmcbnd.txt"
     output = open(lmbnd_output_filename, "a")
-    subprocess.call("lmbnd.run", stdout=output)
-
+    subprocess.run("lmbnd.run", stdout=output, stderr=output)
     error = aborted(lmbnd_output_filename)
     return [error]
 
@@ -226,6 +225,8 @@ def calc_COHPs(cifpath):
     for i, c in enumerate(atom_classes, 1):
         site = c.split("=")[1].split()[0].strip()
         el = list(_parse_formula(site).keys())[0]
+        if el == "E":
+            continue
         class_dict[el].append(site)
         sites.append([site, i])
 
@@ -275,7 +276,6 @@ def calc_COHPs(cifpath):
                 if "NUMBER OF COHPs=  0" in line:
                     _process_cohp = False
 
-                print(i, line, _process_cohp)
                 if _process_cohp:
                     process_COHP()
         if os.path.isfile("DATA.COHP"):
@@ -288,7 +288,7 @@ def calc_COHPs(cifpath):
 def run_cohp(iteration):
     lmincohp_output_filename = f"output_lmincohp_{iteration}.txt"
     output = open(lmincohp_output_filename, "a")
-    subprocess.call("lmincohp.run", stdout=output)
+    subprocess.run("lmincohp.run", stdout=output, stderr=output)
 
     error = aborted(lmincohp_output_filename)
     error = False
@@ -304,7 +304,7 @@ def run_cohp(iteration):
     if not error:
         lmcohp_output_filename = f"output_lmcohp_{iteration}.txt"
         output = open(lmcohp_output_filename, "a")
-        subprocess.call("lmcohp.run", stdout=output)
+        subprocess.run("lmcohp.run", stdout=output, stderr=output)
 
         error = aborted(lmcohp_output_filename)
     error = False
@@ -444,17 +444,17 @@ def run_lmto(**kwargs):
     # COHP
     error_cohp = calc_COHPs(kwargs["cif_path"])
 
-    if not (
-        error_init
-        or error_ctl
-        or error_hart
-        or error_ovl
-        or error_es
-        or error_str
-        or not_converged
-        or error_dos
-        or error_bnd
-        or error_cohp
+    if not any(
+        error_init,
+        error_ctl,
+        error_hart,
+        error_ovl,
+        error_es,
+        error_str,
+        not_converged,
+        error_dos,
+        error_bnd,
+        error_cohp,
     ):
         print(f"{kwargs['name']} gracefully exited!")
     else:
