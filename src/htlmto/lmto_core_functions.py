@@ -466,6 +466,7 @@ def run_lmto(**kwargs):
                 zip(
                     [
                         "init",
+                        "ctl",
                         "hart",
                         "ovl",
                         "es",
@@ -477,6 +478,7 @@ def run_lmto(**kwargs):
                     ],
                     [
                         error_init,
+                        error_ctl,
                         error_hart,
                         error_ovl,
                         error_es,
