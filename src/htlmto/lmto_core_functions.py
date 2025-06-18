@@ -231,7 +231,12 @@ def calc_COHPs(cifpath):
         sites.append([site, i])
 
     max_distances = get_distances_from_cifkit(cifpath)
-    print("Available distances: ", max_distances)
+
+    print(f"Sites for COHP calculation: {sites}")
+    print("Available distances: ")
+    for k, v in max_distances.items():
+        print(f"\t{k:<3} : {v}")
+
     # CLASS1=1 CLASS2=1 DIMIN=.5 DIMAX=.6
     for i in range(len(sites)):
         site1, class_num1 = sites[i]
@@ -246,13 +251,13 @@ def calc_COHPs(cifpath):
             str_site2 = f"{site2}({j})"
             if dimax is None:
                 print(
-                    f"\t\tPair: site(class) {str_site1:<6} and {str_site2:<6} \
+                    f"\t\tPair: {str_site1:<6} and {str_site2:<6} \
                         - no distance found."
                 )
                 continue
             else:
                 print(
-                    f"\t\tPair: site(class) {str_site1:<6} and {str_site2:<6} \
+                    f"\t\tPair: {str_site1:<6} and {str_site2:<6} \
                         - {dimax:.4f}."
                 )
 
