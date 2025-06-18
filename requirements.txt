@@ -1,3 +1,0 @@
-numpy==2.2.1
-pandas==2.2.3
-pexpect==4.8.0
