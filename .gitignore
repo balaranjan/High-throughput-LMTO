@@ -2,6 +2,7 @@ __pycache__/
 test/
 .DS_Store
 tests/calcs/
+tests/allc/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
