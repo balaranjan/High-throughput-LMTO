@@ -4,17 +4,17 @@ import subprocess
 import pandas as pd
 from collections import defaultdict
 import shutil
-from utilities import print_to_console
-from lmto_helper_functions import write_INIT_file
-from lmto_helper_functions import aborted
-from lmto_helper_functions import find_issues
-from lmto_helper_functions import modify_CTRL_file
-from lmto_helper_functions import read_ctrl
-from lmto_helper_functions import process_dos_data
-from lmto_helper_functions import process_COHP
-from lmto_helper_functions import extract_scf_data
-from lmto_helper_functions import get_band_structure
-from utilities import get_distances_from_cifkit
+from .utilities import print_to_console
+from .lmto_helper_functions import write_INIT_file
+from .lmto_helper_functions import aborted
+from .lmto_helper_functions import find_issues
+from .lmto_helper_functions import modify_CTRL_file
+from .lmto_helper_functions import read_ctrl
+from .lmto_helper_functions import process_dos_data
+from .lmto_helper_functions import process_COHP
+from .lmto_helper_functions import extract_scf_data
+from .lmto_helper_functions import get_band_structure
+from .utilities import get_distances_from_cifkit
 
 
 @print_to_console

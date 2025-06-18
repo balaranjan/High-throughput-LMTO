@@ -4,7 +4,7 @@ from cifkit import Cif
 import datetime
 
 
-from cif_reader import read_cif
+from .cif_reader import read_cif
 
 
 def print_to_console(func):
@@ -87,6 +87,7 @@ def extract_data_from_cif(cif_path):
         "_space_group_IT_number": cif.space_group_number,
         "origin": 2 if cif.has_origin_choice_2 else 1,
         "atom_site_data": cif.site_data,
+        "num_atoms": cif.num_atoms,
         "name": name,
     }
 

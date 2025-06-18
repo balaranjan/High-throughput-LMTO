@@ -1,5 +1,5 @@
-from lmto_core_functions import run_lmto
-from utilities import extract_data_from_cif
+from .lmto_core_functions import run_lmto
+from .utilities import extract_data_from_cif
 import argparse
 import os
 

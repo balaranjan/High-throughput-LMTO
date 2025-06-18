@@ -7,6 +7,9 @@ name = "htlmto"
 version = "0.0.1"
 dynamic=['dependencies']
 
+[project.scripts]
+htlmto = "htlmto.cli:main"
+
 [tool.setuptools.packages.find]
 where = ["src"]  # list of folders that contain the packages (["."] by default)
 include = ["*"]  # package names should match these glob patterns (["*"] by default)
