@@ -291,8 +291,17 @@ def run_cohp(iteration):
     subprocess.run("lmincohp.run", stdout=output, stderr=output)
 
     error = aborted(lmincohp_output_filename)
-    error = False
+
+    process_cohp = True
     if not error:
+        with open("COHP", "r") as f:
+            line = " ".join(f.readlines()[:5])
+
+            if "NUMBER OF COHPs=  0" in line:
+                process_cohp = False
+
+    print("CORE 294", error, process_cohp)
+    if not error and process_cohp:
         error, _ = run_lm(
             calc_type=f"cohp{iteration}",
             num_atoms=1,
@@ -356,7 +365,7 @@ def run_lmto(**kwargs):
         return True
 
     modify_CTRL_file(set_IO_VERBOS=50)
-    error_ctl = run_lmctl()
+    error_ctl = run_lmctl()[0]
     error_ovl, VOLSPH_by_VOL, overlap, issues = run_lmovl(iteration=1)
 
     if VOLSPH_by_VOL >= 100:
@@ -369,7 +378,7 @@ def run_lmto(**kwargs):
             VOLSPH_by_VOL is not None and VOLSPH_by_VOL < 100.0 and n_try < 30
         ):
             print(f"\tRunning lmes.run and lmovl.run, iteration {n_try}")
-            error_ctl = run_lmctl()
+            error_ctl = run_lmctl()[0]
             if len(issues):
                 # print(f"\tChanging params based on recomendations {issues}")
                 modify_CTRL_file(**issues)
