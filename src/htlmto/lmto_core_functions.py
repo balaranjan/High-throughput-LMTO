@@ -282,7 +282,7 @@ def calc_COHPs(cifpath):
                     else:
                         print(
                             f"\t\tPair: {str_site1:<6} and {str_site2:<6} \
-                                - {dimax:.4f}\u212B"
+                                - {dimax:.4f} \u212B"
                         )
 
                         dimax *= 1.889

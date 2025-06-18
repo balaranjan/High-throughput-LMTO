@@ -27,7 +27,9 @@ def main():
         description=description, formatter_class=argparse.RawTextHelpFormatter
     )
     parser.add_argument("input_path", help="Path to the input file / folder")
-    parser.add_argument("--force-O2", help="Force origin choice 2")
+    parser.add_argument(
+        "--force-O2", help="Force origin choice 2", action="store_true"
+    )
     parser.add_argument(
         "-n",
         "--num-cores",
@@ -39,7 +41,7 @@ def main():
 
     args = parser.parse_args()
 
-    if os.path.isfile(args.input_file):
+    if os.path.isfile(args.input_path):
         cif_data = extract_data_from_cif(args.input_path)
 
         if args.force_O2:
@@ -64,7 +66,7 @@ def main():
         ]
 
         tasks = []
-        full_path = os.path.join(os.chdir, args.input_path)
+        full_path = os.path.join(os.getcwd(), args.input_path)
         for i, cname in enumerate(cif_names, 0):
             cif = cname.split(os.sep)[-1]
 
