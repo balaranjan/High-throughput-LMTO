@@ -240,36 +240,46 @@ def calc_COHPs(cifpath):
         print(f"\t\t{k:<3} : {v}")
 
     # CLASS1=1 CLASS2=1 DIMIN=.5 DIMAX=.6
-    for i, (element, element_sites) in enumerate(class_dict.items()):
+    elements = list(class_dict.keys())
+    for element1 in elements:
+        element1_sites = class_dict[element1]
+        if not element1_sites:
+            continue
 
-        site1, class_num1 = element_sites[i]
-        str_site1 = f"{site1}({class_num1})"
-        print(f"\t\tCOHP_{element:<2}.")
-        class_pairs = []
-
-        for j in range(len(element_sites)):
-            site2, class_num2 = element_sites[j]
-
-            dimax = max_distances[site1].get(site2, None)
-            str_site2 = f"{site2}({class_num2})"
-
-            if dimax is None:
-                print(
-                    f"\t\tPair: {str_site1:<6} and {str_site2:<6} \
-                        - no distance found."
-                )
+        ind_el1 = elements.index(element1)
+        for element2 in elements[ind_el1:]:
+            element2_sites = class_dict[element2]
+            if not len(element2_sites):
                 continue
-            else:
-                print(
-                    f"\t\tPair: {str_site1:<6} and {str_site2:<6} \
-                        - {dimax:.4f}."
-                )
 
-                dimax *= 1.889
-                class_pairs.append(
-                    f"CLASS1={class_num1} CLASS2={class_num2} \
-                        DIMIN=0.5 DIMAX={dimax:.0f} \n"
-                )
+            print(f"\t\tCalculating COHP for {element1:<2} and {element2:<2}.")
+            class_pairs = []
+
+            for site1, class_num1 in element1_sites:
+                str_site1 = f"{site1}({class_num1})"
+
+                for site2, class_num2 in element2_sites:
+                    str_site2 = f"{site2}({class_num2})"
+
+                    dimax = max_distances[site1].get(site2, None)
+
+                    if dimax is None:
+                        print(
+                            f"\t\tPair: {str_site1:<6} and {str_site2:<6} \
+                                - no distance found."
+                        )
+                        continue
+                    else:
+                        print(
+                            f"\t\tPair: {str_site1:<6} and {str_site2:<6} \
+                                - {dimax:.4f}."
+                        )
+
+                        dimax *= 1.889
+                        class_pairs.append(
+                            f"CLASS1={class_num1} CLASS2={class_num2} \
+                                DIMIN=0.5 DIMAX={dimax:.0f} \n"
+                        )
 
         # for i in range(len(sites)):
         #     site1, class_num1 = sites[i]
@@ -314,16 +324,18 @@ def calc_COHPs(cifpath):
                 set_COHP_ALL=cohp,
             )
 
-            shutil.copy("CTRL", f"COHP_BAK_CTRL_{element}")
+            shutil.copy("CTRL", f"COHP_BAK_CTRL_{element1}_{element2}")
 
             error, no_cohp_found = run_cohp(iteration=i)
 
             if not error and not no_cohp_found:
-                shutil.copy("COHP", f"COHP_{element}")
+                shutil.copy("COHP", f"COHP_{element1}_{element2}")
                 process_COHP()
 
                 if os.path.isfile("DATA.COHP"):
-                    shutil.move("DATA.COHP", f"DATA.COHP_{element}")
+                    shutil.move(
+                        "DATA.COHP", f"DATA.COHP_{element1}_{element2}"
+                    )
 
     return error
 
