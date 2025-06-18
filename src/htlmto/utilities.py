@@ -96,4 +96,6 @@ def extract_data_from_cif(cif_path):
         "name": name,
     }
 
+    print(cif.site_data)
+
     return data
