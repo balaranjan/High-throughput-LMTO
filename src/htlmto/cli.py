@@ -52,10 +52,12 @@ def main():
 
     args = parser.parse_args()
     cif_data = extract_data_from_cif(args.input_path)
-    cif_data["calc_path"] = os.getcwd()
-    cif_data["cif_path"] = os.path.join(os.getcwd(), args.input_path)
 
-    run_lmto(**cif_data)
+    if cif_data:
+        cif_data["calc_path"] = os.getcwd()
+        cif_data["cif_path"] = os.path.join(os.getcwd(), args.input_path)
+
+        run_lmto(**cif_data)
 
 
 if __name__ == "__main__":

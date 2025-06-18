@@ -48,6 +48,7 @@ def get_d_by_dmin_CN(v):
 
 
 def get_distances_from_cifkit(cifpath):
+
     cif = Cif(cifpath)
     cif.compute_connections()
 
@@ -70,6 +71,10 @@ def extract_data_from_cif(cif_path):
     """Parse CIF and extract the information needed for LMTO calculation."""
 
     cif = read_cif(cif_path)
+
+    if not cif:
+        return
+
     cell = cif.cell
 
     if cif.id:

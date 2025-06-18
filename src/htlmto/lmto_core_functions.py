@@ -236,13 +236,23 @@ def calc_COHPs(cifpath):
     for i in range(len(sites)):
         site1, class_num1 = sites[i]
         class_pairs = []
+
+        print(f"\t\tCOHP_{i} is for site(class) {site1}({i}).")
         for j in range(i, len(sites)):
             site2, class_num2 = sites[j]
 
             dimax = max_distances[site1].get(site2, None)
             if dimax is None:
-                print(f"\t\tNo distance data for {site1} and {site2}.")
+                print(
+                    f"\t\tPair: site(class) {site1}({i}) and {site2}({j}) \
+                        - no distance found."
+                )
                 continue
+            else:
+                print(
+                    f"\t\tPair: site(class) {site1}({i}) and {site2}({j}) \
+                        - {dimax:.4f}."
+                )
 
             dimax *= 1.889
             class_pairs.append(
