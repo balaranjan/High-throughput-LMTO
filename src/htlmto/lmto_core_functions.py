@@ -3,6 +3,7 @@ import time
 import subprocess
 import pandas as pd
 import shutil
+from collections import defaultdict
 from .utilities import print_to_console
 from .lmto_helper_functions import write_INIT_file
 from .lmto_helper_functions import aborted
@@ -218,35 +219,36 @@ def run_lmbnd():
 def calc_COHPs(cifpath):
     ctrl = read_ctrl()
 
-    # class_dict = defaultdict(list)
-    sites = []
+    class_dict = defaultdict(list)
+    # sites = []
     atom_classes = [line for line in ctrl["CLASS"] if "IDMOD" not in line]
     for i, c in enumerate(atom_classes, 1):
         site = c.split("=")[1].split()[0].strip()
         el = list(_parse_formula(site).keys())[0]
         if el == "E":
             continue
-        # class_dict[el].append(site)
-        sites.append([site, i])
+        class_dict[el].append([site, i])
+        # sites.append([site, i])
 
     max_distances = get_distances_from_cifkit(cifpath)
 
     error = False
-    print(f"\n\tSites for COHP calculation: {sites}")
-    print("\tAvailable distances: ")
+
+    print("\tCalculated max interaction distances (A): ")
 
     for k, v in max_distances.items():
         print(f"\t\t{k:<3} : {v}")
 
     # CLASS1=1 CLASS2=1 DIMIN=.5 DIMAX=.6
-    for i in range(len(sites)):
-        site1, class_num1 = sites[i]
+    for i, (element, element_sites) in enumerate(class_dict.items()):
+
+        site1, class_num1 = element_sites[i]
+        str_site1 = f"{site1}({class_num1})"
+        print(f"\t\tCOHP_{i:<2} is for {element}.")
         class_pairs = []
 
-        str_site1 = f"{site1}({class_num1})"
-        print(f"\t\tCOHP_{i:<2} is for site(class) {str_site1}.")
-        for j in range(i, len(sites)):
-            site2, class_num2 = sites[j]
+        for j in range(len(element_sites)):
+            site2, class_num2 = element_sites[j]
 
             dimax = max_distances[site1].get(site2, None)
             str_site2 = f"{site2}({class_num2})"
@@ -268,6 +270,37 @@ def calc_COHPs(cifpath):
                     f"CLASS1={class_num1} CLASS2={class_num2} \
                         DIMIN=0.5 DIMAX={dimax:.0f} \n"
                 )
+
+        # for i in range(len(sites)):
+        #     site1, class_num1 = sites[i]
+        #     class_pairs = []
+
+        #     str_site1 = f"{site1}({class_num1})"
+        #     print(f"\t\tCOHP_{i:<2} is for site(class) {str_site1}.")
+        #     for j in range(i, len(sites)):
+        #         site2, class_num2 = sites[j]
+
+        #         dimax = max_distances[site1].get(site2, None)
+        #         str_site2 = f"{site2}({class_num2})"
+
+        #         if dimax is None:
+        #             print(
+        #                 f"\t\tPair: {str_site1:<6} and {str_site2:<6} \
+        #                     - no distance found."
+        #             )
+        #             continue
+        #         else:
+        #             print(
+        #                 f"\t\tPair: {str_site1:<6} and {str_site2:<6} \
+        #                     - {dimax:.4f}."
+        #             )
+
+        #             dimax *= 1.889
+        #             class_pairs.append(
+        #                 f"CLASS1={class_num1} CLASS2={class_num2} \
+        #                     DIMIN=0.5 DIMAX={dimax:.0f} \n"
+        #             )
+
         if class_pairs:
             cohp = [ctrl["COHP"][0]]
             cohp.extend(class_pairs)
