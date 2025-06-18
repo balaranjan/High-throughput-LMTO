@@ -265,21 +265,14 @@ def calc_COHPs(cifpath):
         # modify_CTRL_file(set_OPTIONS_COHP="T")
         # modify_CTRL_file(set_COHP_ALL=cohp)
 
-        error = run_cohp(iteration=i)[0]
+        error, error_cohp = run_cohp(iteration=i)[0]
 
-        _process_cohp = True
-        if not error:
+        if not error and error_cohp:
             shutil.copy("COHP", f"COHP_{i}")
-            with open(f"COHP_{i}", "r") as f:
-                line = " ".join(f.readlines()[:5])
+            process_COHP()
 
-                if "NUMBER OF COHPs=  0" in line:
-                    _process_cohp = False
-
-                if _process_cohp:
-                    process_COHP()
-        if os.path.isfile("DATA.COHP"):
-            shutil.move("DATA.COHP", f"DATA.COHP_{i}")
+            if os.path.isfile("DATA.COHP"):
+                shutil.move("DATA.COHP", f"DATA.COHP_{i}")
 
     return error
 
@@ -300,7 +293,10 @@ def run_cohp(iteration):
             if "NUMBER OF COHPs=  0" in line:
                 process_cohp = False
 
-    print("CORE 294", error, process_cohp)
+    if not process_cohp:
+        # no COHP found
+        return True, True
+
     if not error and process_cohp:
         error, _ = run_lm(
             calc_type=f"cohp{iteration}",
@@ -317,7 +313,7 @@ def run_cohp(iteration):
 
         error = aborted(lmcohp_output_filename)
     error = False
-    return [error]
+    return [error, process_cohp]
 
 
 def run_lmto(**kwargs):
