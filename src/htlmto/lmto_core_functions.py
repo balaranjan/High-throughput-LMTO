@@ -15,6 +15,7 @@ from .lmto_helper_functions import process_COHP
 from .lmto_helper_functions import extract_scf_data
 from .lmto_helper_functions import get_band_structure
 from .utilities import get_distances_from_cifkit
+from .cif_reader.base import _parse_formula
 
 
 @print_to_console
@@ -224,7 +225,7 @@ def calc_COHPs(cifpath):
     atom_classes = [line for line in ctrl["CLASS"] if "IDMOD" not in line]
     for i, c in enumerate(atom_classes, 1):
         site = c.split("=")[1].split()[0].strip()
-        el = site["symbol"]
+        el = list(_parse_formula(site).keys())[0]
         class_dict[el].append(site)
         sites.append([site, i])
 

@@ -440,8 +440,7 @@ def write_ctrl(ctrl, **kwargs):
 
     with open("CTRL", "w") as f:
         for k, v in ctrl.items():
-            if k == "COHP":
-                print("cohp", type(v), v)
+
             if isinstance(v, dict):
                 block = ""
                 line = f"{k:<10}"
