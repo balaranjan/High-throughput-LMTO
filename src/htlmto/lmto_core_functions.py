@@ -241,7 +241,7 @@ def calc_COHPs(cifpath):
 
             dimax = max_distances[site1].get(site2, None)
             if dimax is None:
-                print(f"{site1} {site2} no dist")
+                print(f"\t\tNo distance data for {site1} and {site2}.")
                 continue
 
             dimax *= 1.889
@@ -445,16 +445,18 @@ def run_lmto(**kwargs):
     error_cohp = calc_COHPs(kwargs["cif_path"])
 
     if not any(
-        error_init,
-        error_ctl,
-        error_hart,
-        error_ovl,
-        error_es,
-        error_str,
-        not_converged,
-        error_dos,
-        error_bnd,
-        error_cohp,
+        [
+            error_init,
+            error_ctl,
+            error_hart,
+            error_ovl,
+            error_es,
+            error_str,
+            not_converged,
+            error_dos,
+            error_bnd,
+            error_cohp,
+        ]
     ):
         print(f"{kwargs['name']} gracefully exited!")
     else:
