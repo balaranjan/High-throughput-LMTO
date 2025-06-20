@@ -7,7 +7,7 @@ This is a package to automate the steps involved in performing LMTO calculations
 
 Outputs can be visualized using the following [plotter package](https://github.com/EmilJaffal/High-throughput-LMTO-plotter).
 
-> The current README.md serves as a tutorial and documentation - last update January 16, 2025
+> The current README.md serves as a tutorial and documentation - last update June 20, 2025
 
 ## Demo
 
@@ -42,7 +42,7 @@ It's simple. The only command required is the following:
 pip install -e .
 ```
 
-### Install TB-LMTO-ASA and `htlmto` via docker container.
+### Install TB-LMTO-ASA and `htlmto` via docker container
 
 If you have the lmto source code (not shared in this repository) and want to setup a docker container, you may use the provided docker file.
 
@@ -54,7 +54,7 @@ To setup the docker container,
 4. In a terminal window, `cd` into `High-throughput-LMTO`
 5. Type `docker build -t YOUR_CONTAINER_NAME .`
 6. To share files between your host (the computer where container is installed) and the container, make a directory
-7. To launch the container with file sharing, type `docker run --user lmto --cpus=2.0 -it --mount type=bind,source=/path/to/directory_created_in_step_6_,target=/home/lmto/lmto_calculations YOUR_CONTAINER_NAME`
+7. To launch the container with file sharing, type `docker run --user lmto --cpus=2.0 -it --mount type=bind,source=/path/to/directory_created_in_step_6,target=/home/lmto/lmto_calculations YOUR_CONTAINER_NAME`
 
 ## Verify your package has been installed
 
