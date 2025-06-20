@@ -3,6 +3,7 @@ test/
 .DS_Store
 tests/calcs/
 tests/allc/
+docker_test
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
