@@ -5,7 +5,7 @@ import pandas as pd
 import shutil
 from collections import defaultdict
 from .cif_reader.base import _parse_formula
-from .utilities import print_to_console
+from .utilities import print_progress_to_console
 from .utilities import get_distances_from_cifkit
 from .lmto_helper_functions import write_INIT_file
 from .lmto_helper_functions import aborted
@@ -21,7 +21,7 @@ from .plotting import plot_cohps
 from .plotting import plot_band_structure
 
 
-@print_to_console
+@print_progress_to_console
 def run_lminit(**kwargs):
 
     write_INIT_file(**kwargs)
@@ -34,7 +34,7 @@ def run_lminit(**kwargs):
     return [error]
 
 
-@print_to_console
+@print_progress_to_console
 def run_lmhart():
 
     lmhart_output_filename = "output_lmhart.txt"
@@ -59,7 +59,7 @@ def run_lmhart():
     return [error, VOLSPH_by_VOL]
 
 
-@print_to_console
+@print_progress_to_console
 def run_lmovl(iteration):
 
     lmvol_output_filename = f"output_lmovl_{iteration}.txt"
@@ -97,7 +97,7 @@ def run_lmovl(iteration):
     return [error, VOLSPH_by_VOL, overlap, issues]
 
 
-@print_to_console
+@print_progress_to_console
 def run_lmes(iteration):
 
     lmes_output_filename = f"output_lmes_{iteration}.txt"
@@ -134,7 +134,7 @@ def run_lmes(iteration):
     return [error, VOLSPH_by_VOL]
 
 
-@print_to_console
+@print_progress_to_console
 def run_lmctl():
 
     lmctl_output_filename = "output_lmctl.txt"
@@ -145,7 +145,7 @@ def run_lmctl():
     return [error]
 
 
-@print_to_console
+@print_progress_to_console
 def run_lmstr(iteration):
     lmstr_output_filename = f"output_lmstr_{iteration}.txt"
     output = open(lmstr_output_filename, "w")
@@ -159,7 +159,7 @@ def run_lmstr(iteration):
     return [error, issues]
 
 
-@print_to_console
+@print_progress_to_console
 def run_lm(calc_type, num_atoms, n_try_max=5, get_etots=True):
 
     converged = False
@@ -198,7 +198,7 @@ def run_lm(calc_type, num_atoms, n_try_max=5, get_etots=True):
     return [not converged, etot_and_time]
 
 
-@print_to_console
+@print_progress_to_console
 def run_lmdos():
     modify_CTRL_file(set_DOS_EMIN=-1.1, set_DOS_EMAX=1.1, set_DOS_NOPTS=1800)
 
@@ -210,7 +210,7 @@ def run_lmdos():
     return [error]
 
 
-@print_to_console
+@print_progress_to_console
 def run_lmbnd():
     lmbnd_output_filename = "output_lmcbnd.txt"
     output = open(lmbnd_output_filename, "a")
@@ -219,7 +219,7 @@ def run_lmbnd():
     return [error]
 
 
-def calc_COHPs(cifpath, calc_dir):
+def calc_COHPs(cifpath):
     ctrl = read_ctrl()
 
     class_dict = defaultdict(list)
@@ -320,12 +320,12 @@ def calc_COHPs(cifpath, calc_dir):
                             "DATA.COHP", f"data.cohp_{element1}_{element2}"
                         )
 
-                        plot_cohps(calc_dir)
+                        plot_cohps(".")
 
     return error
 
 
-@print_to_console
+@print_progress_to_console
 def run_cohp(iteration):
     lmincohp_output_filename = f"output_lmincohp_{iteration}.txt"
     output = open(lmincohp_output_filename, "a")
@@ -487,7 +487,7 @@ def run_lmto(**kwargs):
     elem_classes = process_dos_data(elements="all", name="DOS")  # TDOS
     for k, v in elem_classes.items():
         process_dos_data(elements=v, name=f"DOS-{k}")
-    plot_dos(kwargs["calc_path"])
+    plot_dos(".")
 
     # Band structure
     error_bnd = run_lmbnd()[0]
@@ -495,10 +495,10 @@ def run_lmto(**kwargs):
         print(f"{kwargs['name']} failed")
         return True
     get_band_structure(kwargs["name"].split("-")[0])
-    plot_band_structure(kwargs["calc_path"])
+    plot_band_structure(".")
 
     # COHP
-    error_cohp = calc_COHPs(kwargs["cif_path"], kwargs["calc_path"])
+    error_cohp = calc_COHPs(kwargs["cif_path"])
 
     if not any(
         [

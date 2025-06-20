@@ -5,7 +5,7 @@ import datetime
 from .cif_reader import read_cif
 
 
-def print_to_console(func):
+def print_progress_to_console(func):
     """Print current step and its staus at the end to console."""
 
     def wrapper(**kwargs):
