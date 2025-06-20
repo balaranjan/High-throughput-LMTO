@@ -478,6 +478,7 @@ def run_lmto(**kwargs):
     if error_dos:
         print(f"{kwargs['name']} failed")
         return True
+
     elem_classes = process_dos_data(elements="all", name="DOS")  # TDOS
     for k, v in elem_classes.items():
         process_dos_data(elements=v, name=f"DOS-{k}")

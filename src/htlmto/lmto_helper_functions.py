@@ -629,7 +629,7 @@ def process_dos_data(elements, name):
         name += "-total"
     df_dos.to_csv(f"{name}.csv", index=False)
 
-    shutil.copy("DATA.DOS", f"data.dos_{elements}")
+    shutil.copy("DATA.DOS", f"data.dos_{name}")
 
     if elements == "all":
         return elem_classes
