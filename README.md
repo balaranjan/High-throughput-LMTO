@@ -50,8 +50,8 @@ To setup the docker container,
 
 1. Install docker, if you haven't already
 2. Clone or download this repository
-3. Copy the TB-LMTO-ASA source code (in `.tar.gz` archive format) and rename it as `source.tar.gz`
-4. In a terminal window, `cd` into `High-throughput-LMTO`
+3. In a terminal window, `cd` into `High-throughput-LMTO` 
+4. Copy the TB-LMTO-ASA source code (in `.tar.gz` archive format) and rename it as `source.tar.gz`
 5. Type `docker build -t YOUR_CONTAINER_NAME .`
 6. To share files between your host (the computer where container is installed) and the container, make a directory
 7. To launch the container with file sharing, type `docker run --user lmto --cpus=2.0 -it --mount type=bind,source=/path/to/directory_created_in_step_6,target=/home/lmto/lmto_calculations YOUR_CONTAINER_NAME`
