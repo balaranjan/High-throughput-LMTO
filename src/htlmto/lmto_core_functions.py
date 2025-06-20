@@ -304,17 +304,17 @@ def calc_COHPs(cifpath):
                     set_COHP_ALL=cohp,
                 )
 
-                shutil.copy("CTRL", f"BAK_CTRL_COHP_{element1}_{element2}")
+                shutil.copy("CTRL", f"bak_cohp_ctrl_{element1}_{element2}")
 
                 error, no_cohp_found = run_cohp(iteration=i)
 
                 if not error and not no_cohp_found:
-                    shutil.copy("COHP", f"COHP_{element1}_{element2}")
+                    shutil.copy("COHP", f"cohp_{element1}_{element2}")
                     process_COHP()
 
                     if os.path.isfile("DATA.COHP"):
                         shutil.move(
-                            "DATA.COHP", f"DATA.COHP_{element1}_{element2}"
+                            "DATA.COHP", f"data.cohp_{element1}_{element2}"
                         )
 
     return error
