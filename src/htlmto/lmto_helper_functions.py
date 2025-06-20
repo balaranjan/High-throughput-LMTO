@@ -2,6 +2,7 @@ from collections import defaultdict
 import pandas as pd
 import numpy as np
 import pexpect
+import shutil
 import os
 
 
@@ -620,13 +621,15 @@ def process_dos_data(elements, name):
 
     df_dos = pd.read_csv(
         "DATA.DOS",
-        # delimiter="\s+",
+        delimiter="\\s+",
         names=["Energy (eV)", "DOS", "Intg. DOS"],
         engine="python",
     )
     if elements == "all":
         name += "-total"
     df_dos.to_csv(f"{name}.csv", index=False)
+
+    shutil.copy("DATA.DOS", f"data.dos_{name}")
 
     if elements == "all":
         return elem_classes
