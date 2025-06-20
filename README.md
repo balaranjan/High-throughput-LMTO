@@ -1,7 +1,7 @@
 # High-throughput LMTO
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/balaranjan/High-throughput-LMTO/blob/main/LICENSE)
-![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)
+![Python 3.12](https://img.shields.io/badge/python-3.13-blue.svg)
 
 This is a package to automate the steps involved in performing LMTO calculations. The code will take a list of .cif files as input and for each structure in the list, an LMTO calculation will be performed including optimization, band structure calculation, and density of states calculation (DOS). The outputs from band structure and DOS calculation are saved as comma-separated (.csv) files.
 
