@@ -4,7 +4,9 @@ import subprocess
 import pandas as pd
 import shutil
 from collections import defaultdict
+from .cif_reader.base import _parse_formula
 from .utilities import print_to_console
+from .utilities import get_distances_from_cifkit
 from .lmto_helper_functions import write_INIT_file
 from .lmto_helper_functions import aborted
 from .lmto_helper_functions import find_issues
@@ -14,8 +16,9 @@ from .lmto_helper_functions import process_dos_data
 from .lmto_helper_functions import process_COHP
 from .lmto_helper_functions import extract_scf_data
 from .lmto_helper_functions import get_band_structure
-from .utilities import get_distances_from_cifkit
-from .cif_reader.base import _parse_formula
+from .plotting import plot_dos
+from .plotting import plot_cohps
+from .plotting import plot_band_structure
 
 
 @print_to_console
@@ -216,7 +219,7 @@ def run_lmbnd():
     return [error]
 
 
-def calc_COHPs(cifpath):
+def calc_COHPs(cifpath, calc_dir):
     ctrl = read_ctrl()
 
     class_dict = defaultdict(list)
@@ -316,6 +319,8 @@ def calc_COHPs(cifpath):
                         shutil.move(
                             "DATA.COHP", f"data.cohp_{element1}_{element2}"
                         )
+
+                        plot_cohps(calc_dir)
 
     return error
 
@@ -482,6 +487,7 @@ def run_lmto(**kwargs):
     elem_classes = process_dos_data(elements="all", name="DOS")  # TDOS
     for k, v in elem_classes.items():
         process_dos_data(elements=v, name=f"DOS-{k}")
+    plot_dos(kwargs["calc_path"])
 
     # Band structure
     error_bnd = run_lmbnd()[0]
@@ -489,9 +495,10 @@ def run_lmto(**kwargs):
         print(f"{kwargs['name']} failed")
         return True
     get_band_structure(kwargs["name"].split("-")[0])
+    plot_band_structure(kwargs["calc_path"])
 
     # COHP
-    error_cohp = calc_COHPs(kwargs["cif_path"])
+    error_cohp = calc_COHPs(kwargs["cif_path"], kwargs["calc_path"])
 
     if not any(
         [
