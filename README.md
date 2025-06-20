@@ -100,6 +100,7 @@ The steps to perform an LMTO calculation are as follows:
 6. Modify the number of KPOINTS (currently doubles) and optimize.
 7. Perform band structure calculation.
 8. Perform DOS calculation and extract total DOS and partial DOS for each element in the system.
+9. Perform COHP calculation using interaction distances calculated using coordination environments and save element-element interactions.
 
 ### For Hf, Lanthanides, and Actinides
 
@@ -107,20 +108,12 @@ The steps to perform an LMTO calculation are as follows:
 - All actinides are substituted with Th and and their 5f orbitals are downfolded.
 - Hf is replaced with Zr.
 
-## Installation
-
-```bash
-$ git clone https://github.com/balaranjan/High-throughput-LMTO
-$ cd High-throughput-LMTO
-$ pip install -r requirements.txt
-$ python main.py [folder_containing_cif_files_in_High-throughput-LMTO_directory]/
-```
-
 ## Contributors
 
 - [Balaranjan Selvaratnam](https://github.com/balaranjan)
 - Anton Oliynyk
 - [Emil Jaffal](https://github.com/EmilJaffal)
+- [Sangjoon Bob Lee](https://github.com/bobleesj)
 
 ## How to ask for help
 

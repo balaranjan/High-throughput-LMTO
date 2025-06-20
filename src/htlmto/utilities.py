@@ -2,8 +2,6 @@ import numpy as np
 from collections import defaultdict
 from cifkit import Cif
 import datetime
-
-
 from .cif_reader import read_cif
 
 
