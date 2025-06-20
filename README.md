@@ -34,11 +34,27 @@ conda activate lmto_env
 
 ### Install your package with dependencies sourced from pip
 
+The package requires TB-LMTO program installed and its path added to the system's PATH variable.
+
 It's simple. The only command required is the following:
 
 ```bash
 pip install -e .
 ```
+
+### Install TB-LMTO-ASA and `htlmto` via docker container.
+
+If you have the lmto source code (not shared in this repository) and want to setup a docker container, you may use the provided docker file.
+
+To setup the docker container,
+
+1. Install docker, if you haven't already
+2. Clone or download this repository
+3. Copy the TB-LMTO-ASA source code (in `.tar.gz` archive format) and rename it as `source.tar.gz`
+4. In a terminal window, `cd` into `High-throughput-LMTO`
+5. Type `docker build -t YOUR_CONTAINER_NAME .`
+6. To share files between your host (the computer where container is installed) and the container, make a directory
+7. To launch the container with file sharing, type `docker run --user lmto --cpus=2.0 -it --mount type=bind,source=/path/to/directory_created_in_step_6_,target=/home/lmto/lmto_calculations YOUR_CONTAINER_NAME`
 
 ## Verify your package has been installed
 
@@ -100,6 +116,7 @@ The steps to perform an LMTO calculation are as follows:
 6. Modify the number of KPOINTS (currently doubles) and optimize.
 7. Perform band structure calculation.
 8. Perform DOS calculation and extract total DOS and partial DOS for each element in the system.
+9. Perform COHP calculation using interaction distances calculated using coordination environments and save element-element interactions.
 
 ### For Hf, Lanthanides, and Actinides
 
@@ -107,20 +124,12 @@ The steps to perform an LMTO calculation are as follows:
 - All actinides are substituted with Th and and their 5f orbitals are downfolded.
 - Hf is replaced with Zr.
 
-## Installation
-
-```bash
-$ git clone https://github.com/balaranjan/High-throughput-LMTO
-$ cd High-throughput-LMTO
-$ pip install -r requirements.txt
-$ python main.py [folder_containing_cif_files_in_High-throughput-LMTO_directory]/
-```
-
 ## Contributors
 
 - [Balaranjan Selvaratnam](https://github.com/balaranjan)
 - Anton Oliynyk
 - [Emil Jaffal](https://github.com/EmilJaffal)
+- [Sangjoon Bob Lee](https://github.com/bobleesj)
 
 ## How to ask for help
 
