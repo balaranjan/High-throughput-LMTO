@@ -55,6 +55,7 @@ To setup the docker container,
 5. Type `docker build -t YOUR_CONTAINER_NAME .`
 6. To share files between your host (the computer where container is installed) and the container, make a directory
 7. To launch the container with file sharing, type `docker run --user lmto --cpus=2.0 -it --mount type=bind,source=/path/to/directory_created_in_step_6,target=/home/lmto/lmto_calculations YOUR_CONTAINER_NAME`
+8. (Optional) create an alias (`alias lmto="docker run --user lmto --cpus=2.0 -it --mount type=bind,source=/path/to/directory_created_in_step_6,target=/home/lmto/lmto_calculations YOUR_CONTAINER_NAME"`) in your `.bashrc` or `.bash_profile` file to launch the container.
 
 ## Verify your package has been installed
 
