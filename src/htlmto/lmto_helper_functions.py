@@ -556,7 +556,7 @@ def find_issues(output):
     return solutions
 
 
-def process_dos_data(sites, element, name):
+def process_dos_data(elements, name):
 
     p = pexpect.spawn("gnudos.run")
 
@@ -570,7 +570,7 @@ def process_dos_data(sites, element, name):
     p.sendline("t")
 
     p.expect(" Examples")
-    p.sendline(sites)
+    p.sendline(elements)
 
     classes = str(p.before.decode()).split("\n")
     classes = [c for c in classes if "classes are" in c]
@@ -625,13 +625,13 @@ def process_dos_data(sites, element, name):
         names=["Energy (eV)", "DOS", "Intg. DOS"],
         engine="python",
     )
-    if sites == "all":
+    if elements == "all":
         name += "-total"
     df_dos.to_csv(f"{name}.csv", index=False)
 
-    shutil.copy("DATA.DOS", f"data.dos_{element}")
+    shutil.copy("DATA.DOS", f"data.dos_{elements}")
 
-    if sites == "all":
+    if elements == "all":
         return elem_classes
 
 
