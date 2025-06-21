@@ -90,7 +90,3 @@ def main():
             "The input path given is not recognized as a file or directory.\
                \nPlease check."
         )
-
-
-if __name__ == "__main__":
-    main()
