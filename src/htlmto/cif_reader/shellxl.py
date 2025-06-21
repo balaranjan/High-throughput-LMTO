@@ -102,7 +102,9 @@ class SXL_reader(CIF_Reader):
             .replace("\n", "")
             .replace("atom site ", "")
             for line in values
-            if "atom_site" in line and "atom_site_aniso" not in line
+            if "atom_site" in line
+            and "atom_site_aniso" not in line
+            and "atom_site_iso" not in line
         ]
 
         site_labels = defaultdict(int)

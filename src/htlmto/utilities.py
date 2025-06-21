@@ -6,7 +6,7 @@ from .cif_reader import read_cif
 
 
 def print_progress_to_console(func):
-    """Print current step and its staus at the end to console."""
+    """Print current step and its status at the end to console."""
 
     def wrapper(**kwargs):
         func_name = func.__name__[4:]
@@ -16,8 +16,8 @@ def print_progress_to_console(func):
             print(f"\tRunning {func_name}", end=" ")
         res = func(**kwargs)
 
-        if func_name == "lm":
-            print("error" if res[0] else " ok")
+        if "cohp" in func_name:
+            print("\n\t\terror" if res[0] else "\n\t\tok")
         else:
             print("error" if res[0] else "ok")
         return res
