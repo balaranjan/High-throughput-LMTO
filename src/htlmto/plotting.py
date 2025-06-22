@@ -155,7 +155,8 @@ def plot_dos(calc_dir):
         folder_name_cleaned = re.sub(r'(?<=[A-Za-z])1(?=[A-Za-z])', '', folder_name)
         folder_name_cleaned = re.sub(r'(?<!\d)1$', '', folder_name_cleaned)
         folder_name_subscripted = re.sub(r'(\d+)', lambda x: r'$_\mathrm{' + x.group(0) + r'}$', folder_name_cleaned)
-        ax.set_title(folder_name_subscripted + ' DOS', fontsize=35, pad=20)
+        #ax.set_title(folder_name_subscripted + ' DOS', fontsize=35, pad=20)
+        ax.set_title('DOS', fontsize=35, pad=20)
 
         x_position = ax.get_xlim()[1]
         ax.annotate(
@@ -172,9 +173,9 @@ def plot_dos(calc_dir):
         plt.tight_layout()
 
         if include_e:
-            output_filename = os.path.join(calc_dir, f"{os.path.basename(calc_dir)}_DOS.png")
+            output_filename = os.path.join(calc_dir, 'DOS.png')
         else:
-            output_filename = os.path.join(calc_dir, f"{os.path.basename(calc_dir)}_DOS_noE.png")
+            output_filename = os.path.join(calc_dir, 'DOS_without_E.png')
         
         plt.savefig(output_filename, dpi=300)
         print(f"Plot saved to: {output_filename}")
@@ -222,7 +223,8 @@ def plot_band_structure(calc_dir):
         ax.set_xlabel(r'$\mathit{k}$-points')
         ax.set_ylabel('energy (eV)', labelpad=-5)
 
-        ax.set_title(folder_name_subscripted + ' bandstructure', fontsize=20, pad=10)
+        #ax.set_title(folder_name_subscripted + ' Band Structure', fontsize=20, pad=10)
+        ax.set_title('Band Structure', fontsize=20, pad=10)
         ax.set_xlim(x_min, x_max)
         ax.set_ylim(-2.5, 2.5)
         ax.axhline(0, color='black', linewidth=1.5, linestyle='--', zorder=1)
@@ -249,7 +251,7 @@ def plot_band_structure(calc_dir):
 
         plt.tight_layout()
 
-        save_path = os.path.join(calc_dir, f'{folder_name}_bandstructure.png')
+        save_path = os.path.join(calc_dir, 'Bandstructure.png')
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
 
         print(f"Plot saved to: {save_path}")
@@ -259,7 +261,7 @@ def plot_band_structure(calc_dir):
         print(e)
 
 
-def plot_cohp(calc_dir):
+def plot_cohps(calc_dir):
     try:
         cohp_files = [
             os.path.join(calc_dir, f)
@@ -312,7 +314,8 @@ def plot_cohp(calc_dir):
         folder_name_cleaned = re.sub(r'(?<=[A-Za-z])1(?=[A-ZaZ])', '', folder_name)
         folder_name_cleaned = re.sub(r'(?<!\d)1$', '', folder_name_cleaned)
         folder_name_subscripted = re.sub(r'(\d+)', lambda x: r'$_\mathrm{' + x.group(0) + r'}$', folder_name_cleaned)
-        ax.set_title(folder_name_subscripted + ' COHP', fontsize=35, pad=20)
+        #ax.set_title(folder_name_subscripted + ' COHP', fontsize=35, pad=20)
+        ax.set_title('COHP', fontsize=35, pad=20)
 
         x_position = ax.get_xlim()[1]
         ax.annotate(
@@ -327,7 +330,7 @@ def plot_cohp(calc_dir):
         )
 
         plt.tight_layout()
-        save_path = os.path.join(calc_dir, f'{folder_name}_COHP.png')
+        save_path = os.path.join(calc_dir, 'COHP.png')
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
         print(f"Plot saved to: {save_path}")
         plt.close(fig)
