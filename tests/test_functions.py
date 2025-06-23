@@ -3,14 +3,15 @@ from htlmto import cif_reader
 import os
 
 
-def check_cif_readers():
-    root = "/home/bala/Documents/00_Utils/utilities/tests/test_cifs"
-    cdir = "allc"
-    for cif in os.listdir(f"{root}{os.sep}{cdir}"):
+def test_cif_readers():
+    for cif in os.listdir("cifs"):
+        print(cif)
         if not cif.endswith("cif"):
             continue
-        cif_reader.read_cif(f"{root}{os.sep}{cdir}{os.sep}{cif}", verbose=True)
+        assert cif_reader.read_cif(
+            f"cifs{os.sep}{cif}"
+        ), f"Error reading {cif}"
 
 
 if __name__ == "__main__":
-    check_cif_readers()
+    test_cif_readers()
