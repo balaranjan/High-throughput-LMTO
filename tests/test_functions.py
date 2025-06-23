@@ -4,14 +4,10 @@ import os
 
 
 def test_cif_readers():
-    for cif in os.listdir("cifs"):
-        print(cif)
+    CIF_DIR = os.path.join(os.path.dirname(__file__), "cifs")
+    for cif in os.listdir(CIF_DIR):
         if not cif.endswith("cif"):
             continue
         assert cif_reader.read_cif(
-            f"cifs{os.sep}{cif}"
+            f"{CIF_DIR}{os.sep}{cif}"
         ), f"Error reading {cif}"
-
-
-if __name__ == "__main__":
-    test_cif_readers()
