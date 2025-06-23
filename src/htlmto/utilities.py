@@ -1,8 +1,11 @@
 import numpy as np
+import pandas as pd
 from collections import defaultdict
 from cifkit import Cif
 import datetime
 from .cif_reader import read_cif
+import shutil
+import os
 
 
 def print_progress_to_console(func):
@@ -95,3 +98,44 @@ def extract_data_from_cif(cif_path):
     }
 
     return data
+
+
+def convert_cohp_files_to_csv():
+    files = [
+        _file for _file in os.listdir(".") if _file.startswith("data.cohp_")
+    ]
+    for _file in files:
+        name = f"COHP_{_file[10:]}.csv"
+        print(_file, name)
+        df = pd.read_csv(
+            _file,
+            header=0,
+            names=["Energy (eV)", "COHP", "Int. COHP"],
+            delimiter="\\s+",
+        )
+        df.to_csv(name, index=False)
+
+
+def cleanup():
+    """Create folders and move files.
+
+    1. csv - all csv outputs
+    2. plots - all png files
+    4. logs - all log files
+    4. calculation - rest of the files
+    """
+
+    file_types = [".csv", ".png", ".log"]
+    files = os.listdir(".")
+
+    for sub_dir_name, file_type in zip(["csv", "plots", "logs"], file_types):
+        os.mkdir(sub_dir_name)
+
+        for _file in files:
+            if _file.endswith(file_type):
+                shutil.move(_file, f"{sub_dir_name}{os.sep}{_file}")
+
+    os.mkdir("calculation")
+    for _file in files:
+        if not _file[-4:] in file_types:
+            shutil.move(_file, f"calculation{os.sep}{_file}")
