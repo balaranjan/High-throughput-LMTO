@@ -46,7 +46,7 @@ pip install -e .
 
 If you have the lmto source code (not shared in this repository) and want to setup a docker container, you may use the provided docker file.
 
-Note: This setup works on x86_64 and known to fail in systems with Apple Silicon.  
+Note: This setup works on x86_64 and known to fail in systems with Apple Silicon.
 
 To setup the docker container,
 
