@@ -239,7 +239,9 @@ def plot_dos(calc_dir):
             buffer = 0.1 * max_y
         else:
             print(
-                "No DOS data in the range -6 <= Energy <= 2. Skipping plot. This may be due to an empty or incorrectly formatted DOS.csv file."
+                "No DOS data in the range -6 <= Energy <= 2. Skipping plot. "
+                "This may be due to an empty or incorrectly formatted DOS.csv "
+                "file."
             )
             return
 
@@ -298,12 +300,6 @@ def plot_dos(calc_dir):
             r"(?<=[A-Za-z])1(?=[A-Za-z])", "", folder_name
         )
         folder_name_cleaned = re.sub(r"(?<!\d)1$", "", folder_name_cleaned)
-        folder_name_subscripted = re.sub(
-            r"(\d+)",
-            lambda x: r"$_\mathrm{" + x.group(0) + r"}$",
-            folder_name_cleaned,
-        )
-        # ax.set_title(folder_name_subscripted + ' DOS', fontsize=35, pad=20)
         ax.set_title("DOS", fontsize=35, pad=20)
 
         x_position = ax.get_xlim()[1]
@@ -356,11 +352,6 @@ def plot_band_structure(calc_dir):
             r"(?<=[A-Za-z])1(?=[A-ZaZ])", "", folder_name
         )
         folder_name_cleaned = re.sub(r"(?<!\d)1$", "", folder_name_cleaned)
-        folder_name_subscripted = re.sub(
-            r"(\d+)",
-            lambda x: r"$_\mathrm{" + x.group(0) + r"}$",
-            folder_name_cleaned,
-        )
 
         x_min = min(ticks)
         x_max = max(ticks)
@@ -390,7 +381,6 @@ def plot_band_structure(calc_dir):
         ax.set_xlabel(r"$\mathit{k}$-points")
         ax.set_ylabel("energy (eV)", labelpad=-5)
 
-        # ax.set_title(folder_name_subscripted + ' Band Structure', fontsize=20, pad=10)
         ax.set_title("Band Structure", fontsize=20, pad=10)
         ax.set_xlim(x_min, x_max)
         ax.set_ylim(-2.5, 2.5)
@@ -512,11 +502,7 @@ def plot_cohps(calc_dir):
             r"(?<=[A-Za-z])1(?=[A-ZaZ])", "", folder_name
         )
         folder_name_cleaned = re.sub(r"(?<!\d)1$", "", folder_name_cleaned)
-        folder_name_subscripted = re.sub(
-            r"(\d+)",
-            lambda x: r"$_\mathrm{" + x.group(0) + r"}$",
-            folder_name_cleaned,
-        )
+
         # ax.set_title(folder_name_subscripted + ' COHP', fontsize=35, pad=20)
         ax.set_title("COHP", fontsize=35, pad=20)
 
