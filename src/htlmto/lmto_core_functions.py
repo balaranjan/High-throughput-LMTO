@@ -7,6 +7,8 @@ from collections import defaultdict
 from .cif_reader.base import _parse_formula
 from .utilities import print_progress_to_console
 from .utilities import get_distances_from_cifkit
+from .utilities import convert_cohp_files_to_csv
+from .utilities import cleanup
 from .lmto_helper_functions import write_INIT_file
 from .lmto_helper_functions import aborted
 from .lmto_helper_functions import find_issues
@@ -25,7 +27,7 @@ from .plotting import plot_band_structure
 def run_lminit(**kwargs):
 
     write_INIT_file(**kwargs)
-    lminit_output_filename = "output_lminit.txt"
+    lminit_output_filename = "output_lminit.log"
     output = open(lminit_output_filename, "a")
     subprocess.run("lminit.run", stdout=output, stderr=output)
 
@@ -37,7 +39,7 @@ def run_lminit(**kwargs):
 @print_progress_to_console
 def run_lmhart():
 
-    lmhart_output_filename = "output_lmhart.txt"
+    lmhart_output_filename = "output_lmhart.log"
     output = open(lmhart_output_filename, "a")
     subprocess.run("lmhart.run", stdout=output, stderr=output)
     error = aborted(lmhart_output_filename)
@@ -62,7 +64,7 @@ def run_lmhart():
 @print_progress_to_console
 def run_lmovl(iteration):
 
-    lmvol_output_filename = f"output_lmovl_{iteration}.txt"
+    lmvol_output_filename = f"output_lmovl_{iteration}.log"
     output = open(lmvol_output_filename, "a")
     subprocess.run("lmovl.run", stdout=output, stderr=output)
     VOLSPH_by_VOL = [
@@ -100,7 +102,7 @@ def run_lmovl(iteration):
 @print_progress_to_console
 def run_lmes(iteration):
 
-    lmes_output_filename = f"output_lmes_{iteration}.txt"
+    lmes_output_filename = f"output_lmes_{iteration}.log"
     output = open(lmes_output_filename, "a")
 
     subprocess.run("lmes.run", stdout=output, stderr=output)
@@ -137,7 +139,7 @@ def run_lmes(iteration):
 @print_progress_to_console
 def run_lmctl():
 
-    lmctl_output_filename = "output_lmctl.txt"
+    lmctl_output_filename = "output_lmctl.log"
     output = open(lmctl_output_filename, "a")
     subprocess.run("lmctl.run", stdout=output, stderr=output)
 
@@ -147,7 +149,7 @@ def run_lmctl():
 
 @print_progress_to_console
 def run_lmstr(iteration):
-    lmstr_output_filename = f"output_lmstr_{iteration}.txt"
+    lmstr_output_filename = f"output_lmstr_{iteration}.log"
     output = open(lmstr_output_filename, "w")
     subprocess.run("lmstr.run", stdout=output, stderr=output)
 
@@ -166,7 +168,7 @@ def run_lm(calc_type, num_atoms, n_try_max=5, get_etots=True):
     n_try = 1
     etot_and_time = []
     while not converged and n_try < n_try_max:
-        lm_output_filename = f"output_lm_{calc_type}_{n_try}.txt"
+        lm_output_filename = f"output_lm_{calc_type}_{n_try}.log"
         t0 = time.time()
         print(f"iteration {n_try}", end=" ")
         output = open(lm_output_filename, "w")
@@ -202,7 +204,7 @@ def run_lm(calc_type, num_atoms, n_try_max=5, get_etots=True):
 def run_lmdos():
     modify_CTRL_file(set_DOS_EMIN=-1.1, set_DOS_EMAX=1.1, set_DOS_NOPTS=1800)
 
-    lmdos_output_filename = "output_lmdos.txt"
+    lmdos_output_filename = "output_lmdos.log"
     output = open(lmdos_output_filename, "a")
     subprocess.run("lmdos.run", stdout=output, stderr=output)
 
@@ -212,7 +214,7 @@ def run_lmdos():
 
 @print_progress_to_console
 def run_lmbnd():
-    lmbnd_output_filename = "output_lmcbnd.txt"
+    lmbnd_output_filename = "output_lmcbnd.log"
     output = open(lmbnd_output_filename, "a")
     subprocess.run("lmbnd.run", stdout=output, stderr=output)
     error = aborted(lmbnd_output_filename)
@@ -322,12 +324,14 @@ def calc_COHPs(cifpath):
 
                         plot_cohps(".")
 
+    convert_cohp_files_to_csv()
+
     return error
 
 
 @print_progress_to_console
 def run_cohp(iteration):
-    lmincohp_output_filename = f"output_lmincohp_{iteration}.txt"
+    lmincohp_output_filename = f"output_lmincohp_{iteration}.log"
     output = open(lmincohp_output_filename, "a")
     subprocess.run("lmincohp.run", stdout=output, stderr=output)
 
@@ -355,7 +359,7 @@ def run_cohp(iteration):
 
     error = False
     if not error:
-        lmcohp_output_filename = f"output_lmcohp_{iteration}.txt"
+        lmcohp_output_filename = f"output_lmcohp_{iteration}.log"
         output = open(lmcohp_output_filename, "a")
         subprocess.run("lmcohp.run", stdout=output, stderr=output)
 
@@ -499,6 +503,8 @@ def run_lmto(**kwargs):
 
     # COHP
     error_cohp = calc_COHPs(kwargs["cif_path"])
+
+    cleanup()
 
     if not any(
         [
