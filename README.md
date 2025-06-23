@@ -3,7 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/balaranjan/High-throughput-LMTO/blob/main/LICENSE)
 ![Python 3.12](https://img.shields.io/badge/python-3.13-blue.svg)
 
-This is a package to automate the steps involved in performing LMTO calculations. The code will take a list of .cif files as input and for each structure in the list, an LMTO calculation will be performed including optimization, band structure calculation, and density of states calculation (DOS). The outputs from band structure and DOS calculation are saved as comma-separated (.csv) files.
+This is a package to automate the steps involved in performing LMTO calculations. The code will take a list of .cif files as input and for each structure in the list, an LMTO calculation will be performed including optimization, band structure calculation, and density of states calculation (DOS). The outputs from band structure, DOS, and COHP calculations are saved as comma-separated (.csv) files their plots are saved as png files.
 
 Outputs can be visualized using the following [plotter package](https://github.com/EmilJaffal/High-throughput-LMTO-plotter).
 
@@ -45,6 +45,8 @@ pip install -e .
 ### Install TB-LMTO-ASA and `htlmto` via docker container
 
 If you have the lmto source code (not shared in this repository) and want to setup a docker container, you may use the provided docker file.
+
+Note: This setup works on x86_64 and known to fail in systems with Apple Silicon.  
 
 To setup the docker container,
 
@@ -118,6 +120,7 @@ The steps to perform an LMTO calculation are as follows:
 7. Perform band structure calculation.
 8. Perform DOS calculation and extract total DOS and partial DOS for each element in the system.
 9. Perform COHP calculation using interaction distances calculated using coordination environments and save element-element interactions.
+10. Make plots for DOS, COHP, and band structure.
 
 ### For Hf, Lanthanides, and Actinides
 
