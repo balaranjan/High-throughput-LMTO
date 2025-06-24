@@ -48,7 +48,7 @@ class PCD_reader(CIF_Reader):
 
     def get_origin_choice(self):
         hm_alt = self.get_block("space_group_name_H-M_alt")
-        return "O2" in hm_alt
+        return "O2" in hm_alt or "origin choice 2" in hm_alt
 
     def get_cell(self):
 
