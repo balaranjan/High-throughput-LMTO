@@ -11,3 +11,10 @@ def test_cif_readers():
         assert cif_reader.read_cif(
             f"{CIF_DIR}{os.sep}{cif}"
         ), f"Error reading {cif}"
+
+
+def test_origin_choice2():
+    CIF_DIR = os.path.join(os.path.dirname(__file__), "cifs")
+    cif = cif_reader.read_cif(f"{CIF_DIR}{os.sep}452521.cif")
+    print(cif.read())
+    assert cif.has_origin_choice_2, "wrong origin choice for PCD"

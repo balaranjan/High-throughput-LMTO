@@ -18,15 +18,15 @@ def read_cif(filename, verbose=False):
     if "PCD" in contents:
         if verbose:
             print(" is from PCD")
-        return PCD_reader(filename, verbose=verbose)
+        return PCD_reader(filename, data_source="PCD", verbose=verbose)
     elif "ICSD" in contents:
         if verbose:
             print(" is from ICSD")
-        return ICSD_reader(filename, verbose=verbose)
+        return ICSD_reader(filename, data_source="ICSD", verbose=verbose)
     elif "shelx" in contents:
         if verbose:
             print(" is from ShellXL")
-        return SXL_reader(filename, verbose=verbose)
+        return SXL_reader(filename, data_source="ShellXL", verbose=verbose)
     else:
         print(f"File {filename} form unknown source.")
         return

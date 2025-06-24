@@ -4,8 +4,8 @@ from collections import defaultdict
 
 class ICSD_reader(CIF_Reader):
 
-    def __init__(self, filename, verbose=False):
-        super().__init__(filename, verbose=verbose)
+    def __init__(self, filename, data_source, verbose=False):
+        super().__init__(filename, data_source=data_source, verbose=verbose)
 
     def get_block(self, block_name):
         i_start = None
