@@ -6,7 +6,7 @@ import os
 
 class CIF_Reader(ABC):
 
-    def __init__(self, filename, verbose=False):
+    def __init__(self, filename, data_source, verbose=False):
 
         self.filename = filename
         self.read_file()
@@ -14,6 +14,7 @@ class CIF_Reader(ABC):
         self.headers_numeric = ["x", "y", "z", "occupancy", "multiplicity"]
 
         # data
+        self.data_source = data_source
         self.formula_dict = self.get_formula_dict()
         self.id = self.get_id()
         self.formula = self.get_formula()
@@ -24,7 +25,14 @@ class CIF_Reader(ABC):
         self.structure_type = self.get_structure_type()
         self.has_origin_choice_2 = self.get_origin_choice()
         self.cell = self.get_cell()
-        self.site_data = self.get_site_data()
+
+        try:
+            self.site_data = self.get_site_data()
+        except Exception as e:
+            print(f"Error reading site data from {self.filename}")
+            print(e)
+            return
+
         self.get_standardized_sites()
 
         if verbose:
@@ -32,6 +40,7 @@ class CIF_Reader(ABC):
 
     def read(self):
         print(f"ID       : {self.id}")
+        print(f"Source   : {self.data_source}")
         print(f"Formula  : {self.formula_dict}")
         print(f"SG       : {self.space_group_number}")
         print(f"Z        : {self.Z}")

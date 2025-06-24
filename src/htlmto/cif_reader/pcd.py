@@ -4,8 +4,8 @@ from collections import defaultdict
 
 class PCD_reader(CIF_Reader):
 
-    def __init__(self, filename, verbose=False):
-        super().__init__(filename, verbose=verbose)
+    def __init__(self, filename, data_source, verbose=False):
+        super().__init__(filename, data_source=data_source, verbose=verbose)
 
     def get_block(self, block_name):
         i_start = None
@@ -16,7 +16,11 @@ class PCD_reader(CIF_Reader):
                 break
 
         for i, line in enumerate(self.lines[i_start + 1 :]):
-            if line.startswith("_") or line.startswith("#"):
+            if (
+                line.startswith("_")
+                or line.startswith("#")
+                or line.startswith("loop_")
+            ):
                 i_end = i + i_start + 1
                 break
 
@@ -48,7 +52,8 @@ class PCD_reader(CIF_Reader):
 
     def get_origin_choice(self):
         hm_alt = self.get_block("space_group_name_H-M_alt")
-        return "O2" in hm_alt
+        print(hm_alt)
+        return "O2" in hm_alt or "origin choice 2" in hm_alt
 
     def get_cell(self):
 
