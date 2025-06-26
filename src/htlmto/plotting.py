@@ -297,7 +297,7 @@ def plot_dos(calc_dir):
 
         folder_name = os.path.basename(calc_dir).split("-")[0]
         folder_name_cleaned = re.sub(
-            r"(?<=[A-Za-z])1(?=[A-Za-z])", "", folder_name
+            r"(?<=[A-Za-z])1(?=[A-ZaZ])", "", folder_name
         )
         folder_name_cleaned = re.sub(r"(?<!\d)1$", "", folder_name_cleaned)
         ax.set_title("DOS", fontsize=35, pad=20)
@@ -458,7 +458,11 @@ def plot_cohps(calc_dir):
             )
             if not pair or pair == "data.cohp":
                 pair = "Total"
+            if pair.startswith("-"):
+                pair = pair[1:]  # Remove leading dash if present
+
             color = color_cycle[idx % len(color_cycle)]
+            # Plot COHP (solid, with legend)
             ax.plot(
                 cohp_data["cohp"],
                 cohp_data["energy"],
@@ -466,7 +470,17 @@ def plot_cohps(calc_dir):
                 color=color,
                 linewidth=5,
             )
+            # Plot ICOHP (dashed, no legend)
+            ax.plot(
+                cohp_data["int_cohp"],
+                cohp_data["energy"],
+                color=color,
+                linewidth=3,
+                linestyle="--",
+                zorder=0,
+            )
             all_x_values.extend(np.abs(cohp_data["cohp"].values))
+            all_x_values.extend(np.abs(cohp_data["int_cohp"].values))
 
         # Set axis limits and style to match DOS plot
         ax.set_ylim(-6, 2)
@@ -490,7 +504,7 @@ def plot_cohps(calc_dir):
         legend = ax.legend(
             frameon=True,
             fontsize=30,
-            loc="lower right",
+            loc="lower left",
             handlelength=0.75,
             columnspacing=0.1,
             facecolor="white",
