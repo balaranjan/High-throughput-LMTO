@@ -1,7 +1,8 @@
 import os
 import time
 import subprocess
-import pandas as pd
+
+# import pandas as pd
 import shutil
 from collections import defaultdict
 from .cif_reader.base import _parse_formula
@@ -14,13 +15,16 @@ from .lmto_helper_functions import aborted
 from .lmto_helper_functions import find_issues
 from .lmto_helper_functions import modify_CTRL_file
 from .lmto_helper_functions import read_ctrl
-from .lmto_helper_functions import process_dos_data
+
+# from .lmto_helper_functions import process_dos_data
 from .lmto_helper_functions import process_COHP
 from .lmto_helper_functions import extract_scf_data
-from .lmto_helper_functions import get_band_structure
-from .plotting import plot_dos
+
+# from .lmto_helper_functions import get_band_structure
+# from .plotting import plot_dos
 from .plotting import plot_cohps
-from .plotting import plot_band_structure
+
+# from .plotting import plot_band_structure
 
 
 @print_progress_to_console
@@ -397,109 +401,112 @@ def run_lmto(**kwargs):
             os.mkdir(name)
             os.chdir(name)
         except FileExistsError:
+            print(f"continueing {name}")
             os.chdir(name)
-            for f in os.listdir("."):
-                os.remove(f)
+            # for f in os.listdir("."):
+            #     os.remove(f)
 
-    error_init = run_lminit(**kwargs)[0]
+    # error_init = run_lminit(**kwargs)[0]
 
-    if error_init:
-        print(f"{kwargs['name']} failed")
-        return True
+    # if error_init:
+    #     print(f"{kwargs['name']} failed")
+    #     return True
 
-    error_hart, VOLSPH_by_VOL = run_lmhart()
-    if error_hart:
-        print(f"{kwargs['name']} failed")
-        return True
+    # error_hart, VOLSPH_by_VOL = run_lmhart()
+    # if error_hart:
+    #     print(f"{kwargs['name']} failed")
+    #     return True
 
-    modify_CTRL_file(set_IO_VERBOS=50)
-    error_ctl = run_lmctl()[0]
-    error_ovl, VOLSPH_by_VOL, overlap, issues = run_lmovl(iteration=1)
+    # modify_CTRL_file(set_IO_VERBOS=50)
+    # error_ctl = run_lmctl()[0]
+    # error_ovl, VOLSPH_by_VOL, overlap, issues = run_lmovl(iteration=1)
 
-    if VOLSPH_by_VOL >= 100:
-        error_es = False
-    else:
-        # set VERBOSE to 50
-        n_try = 1
-        print(f"\t\tVOLSPH_by_VOL={VOLSPH_by_VOL}, overlap={overlap}")
-        while (
-            VOLSPH_by_VOL is not None and VOLSPH_by_VOL < 100.0 and n_try < 30
-        ):
-            print(f"\tRunning lmes.run and lmovl.run, iteration {n_try}")
-            error_ctl = run_lmctl()[0]
-            if len(issues):
-                # print(f"\tChanging params based on recomendations {issues}")
-                modify_CTRL_file(**issues)
+    # if VOLSPH_by_VOL >= 100:
+    #     error_es = False
+    # else:
+    # set VERBOSE to 50
+    #     n_try = 1
+    #     print(f"\t\tVOLSPH_by_VOL={VOLSPH_by_VOL}, overlap={overlap}")
+    #     while (
+    #         VOLSPH_by_VOL is not None and VOLSPH_by_VOL < 100.0 and n_try
+    # < 30
+    #     ):
+    #         print(f"\tRunning lmes.run and lmovl.run, iteration {n_try}")
+    #         error_ctl = run_lmctl()[0]
+    #         if len(issues):
+    #             # print(f"\tChanging params based on recomendations
+    # {issues}")
+    #             modify_CTRL_file(**issues)
 
-            error_es, VOLSPH_by_VOL = run_lmes(iteration=n_try)
-            if not error_es:
-                error_ovl, VOLSPH_by_VOL, overlap, issues = run_lmovl(
-                    iteration=1 + n_try
-                )
+    #         error_es, VOLSPH_by_VOL = run_lmes(iteration=n_try)
+    #         if not error_es:
+    #             error_ovl, VOLSPH_by_VOL, overlap, issues = run_lmovl(
+    #                 iteration=1 + n_try
+    #             )
 
-            if error_es or error_ovl:
-                break
+    #         if error_es or error_ovl:
+    #             break
 
-            print(f"\t\tVOLSPH_by_VOL={VOLSPH_by_VOL}, overlap={overlap}")
-            n_try += 1
-        if VOLSPH_by_VOL < 100.0:
-            error_ovl = True
+    #         print(f"\t\tVOLSPH_by_VOL={VOLSPH_by_VOL}, overlap={overlap}")
+    #         n_try += 1
+    #     if VOLSPH_by_VOL < 100.0:
+    #         error_ovl = True
 
-    if error_ovl:
-        print(f"{kwargs['name']} failed")
-        return True
+    # if error_ovl:
+    #     print(f"{kwargs['name']} failed")
+    #     return True
 
-    error_str, issues = run_lmstr(iteration=1)
-    n_try = 1
-    if error_str and len(issues):
-        while error_str and n_try <= 10:
-            modify_CTRL_file(**issues)
-            # print(f"\tRunning lmstr, iteration: {1+n_try}", end=" ")
-            error_str, issues = run_lmstr(iteration=1 + n_try)
-            n_try += 1
+    # error_str, issues = run_lmstr(iteration=1)
+    # n_try = 1
+    # if error_str and len(issues):
+    #     while error_str and n_try <= 10:
+    #         modify_CTRL_file(**issues)
+    #         # print(f"\tRunning lmstr, iteration: {1+n_try}", end=" ")
+    #         error_str, issues = run_lmstr(iteration=1 + n_try)
+    #         n_try += 1
 
-    if error_str:
-        print(f"{kwargs['name']} failed")
-        return True
+    # if error_str:
+    #     print(f"{kwargs['name']} failed")
+    #     return True
 
-    etot_and_time = []
-    not_converged, etot_t = run_lm(
-        calc_type="first", num_atoms=kwargs["num_atoms"], n_try_max=15
-    )
-    etot_and_time.extend(etot_t)
-    if not_converged:
-        print(f"{kwargs['name']} failed")
-        return True
+    # etot_and_time = []
+    # not_converged, etot_t = run_lm(
+    #     calc_type="first", num_atoms=kwargs["num_atoms"], n_try_max=15
+    # )
+    # etot_and_time.extend(etot_t)
+    # if not_converged:
+    #     print(f"{kwargs['name']} failed")
+    #     return True
 
-    # 2x K-point, BEGMOM=F
-    modify_CTRL_file(set_START_BEGMOM="T", modify_BZ_NKABC=2)
-    not_converged, etot_t = run_lm(
-        calc_type="2xKPTS", num_atoms=kwargs["num_atoms"], n_try_max=5
-    )
-    etot_and_time.extend(etot_t)
-    pd.DataFrame(etot_and_time).to_csv("etot_time.csv", index=False)
-    if not_converged:
-        print(f"{kwargs['name']} failed")
-        return True
+    # # 2x K-point, BEGMOM=F
+    # modify_CTRL_file(set_START_BEGMOM="T", modify_BZ_NKABC=2)
+    # not_converged, etot_t = run_lm(
+    #     calc_type="2xKPTS", num_atoms=kwargs["num_atoms"], n_try_max=5
+    # )
+    # etot_and_time.extend(etot_t)
+    # pd.DataFrame(etot_and_time).to_csv("etot_time.csv", index=False)
+    # if not_converged:
+    #     print(f"{kwargs['name']} failed")
+    #     return True
 
-    # DOS
-    error_dos = run_lmdos()[0]
-    if error_dos:
-        print(f"{kwargs['name']} failed")
-        return True
+    # # DOS
+    # error_dos = run_lmdos()[0]
+    # if error_dos:
+    #     print(f"{kwargs['name']} failed")
+    #     return True
 
-    elem_classes = process_dos_data(elements="all", name="DOS")  # TDOS
-    for k, v in elem_classes.items():
-        process_dos_data(elements=v, name=f"DOS-{k}")
-    plot_dos(".")
+    # elem_classes = process_dos_data(elements="all", name="DOS")  # TDOS
+    # for k, v in elem_classes.items():
+    #     process_dos_data(elements=v, name=f"DOS-{k}")
+    # plot_dos(".")
 
-    # Band structure
-    error_bnd = run_lmbnd()[0]
-    if error_bnd:
-        print(f"{kwargs['name']} failed")
-        return True
-    get_band_structure(kwargs["name"].split("-")[0])
-    plot_band_structure(".")
+    # # Band structure
+    # error_bnd = run_lmbnd()[0]
+    # if error_bnd:
+    #     print(f"{kwargs['name']} failed")
+    #     return True
+    # get_band_structure(kwargs["name"].split("-")[0])
+    # plot_band_structure(".")
 
     # COHP
     error_cohp = calc_COHPs(kwargs["cif_path"])
@@ -508,15 +515,15 @@ def run_lmto(**kwargs):
 
     if not any(
         [
-            error_init,
-            error_ctl,
-            error_hart,
-            error_ovl,
-            error_es,
-            error_str,
-            not_converged,
-            error_dos,
-            error_bnd,
+            # error_init,
+            # error_ctl,
+            # error_hart,
+            # error_ovl,
+            # error_es,
+            # error_str,
+            # not_converged,
+            # error_dos,
+            # error_bnd,
             error_cohp,
         ]
     ):
@@ -527,40 +534,30 @@ def run_lmto(**kwargs):
             dict(
                 zip(
                     [
-                        "init",
-                        "ctl",
-                        "hart",
-                        "ovl",
-                        "es",
-                        "str",
-                        "lm",
-                        "dos",
-                        "band",
+                        # "init",
+                        # "ctl",
+                        # "hart",
+                        # "ovl",
+                        # "es",
+                        # "str",
+                        # "lm",
+                        # "dos",
+                        # "band",
                         "cohp",
                     ],
                     [
-                        error_init,
-                        error_ctl,
-                        error_hart,
-                        error_ovl,
-                        error_es,
-                        error_str,
-                        not_converged,
-                        error_dos,
-                        error_bnd,
+                        # error_init,
+                        # error_ctl,
+                        # error_hart,
+                        # error_ovl,
+                        # error_es,
+                        # error_str,
+                        # not_converged,
+                        # error_dos,
+                        # error_bnd,
                         error_cohp,
                     ],
                 )
             )
         )
-    return (
-        error_init
-        or error_hart
-        or error_ovl
-        or error_es
-        or error_str
-        or not_converged
-        or error_dos
-        or error_bnd
-        or error_cohp
-    )
+    return error_cohp
