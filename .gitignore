@@ -97,3 +97,4 @@ target/
 
 # Ipython Notebook
 .ipynb_checkpoints
+source.tar.gz
