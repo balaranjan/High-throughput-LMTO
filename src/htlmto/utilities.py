@@ -48,7 +48,9 @@ def get_d_by_dmin_CN(v):
     return outer_CN
 
 
-def get_distances_from_cifkit(cifpath):
+def get_distances_from_cifkit(cifpath, site_data):
+
+    print(site_data)
 
     cif = Cif(cifpath)
     cif.compute_connections()

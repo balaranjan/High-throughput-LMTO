@@ -221,7 +221,7 @@ def run_lmbnd():
     return [error]
 
 
-def calc_COHPs(cifpath):
+def calc_COHPs(cifpath, site_data):
     ctrl = read_ctrl()
 
     class_dict = defaultdict(list)
@@ -235,7 +235,7 @@ def calc_COHPs(cifpath):
         class_dict[el].append([site, i])
         # sites.append([site, i])
 
-    max_distances = get_distances_from_cifkit(cifpath)
+    max_distances = get_distances_from_cifkit(cifpath, site_data)
 
     error = False
 
@@ -322,7 +322,8 @@ def calc_COHPs(cifpath):
                             "DATA.COHP", f"data.cohp_{element1}_{element2}"
                         )
 
-                        plot_cohps(".")
+    if not error:
+        plot_cohps(".")
 
     convert_cohp_files_to_csv()
 
@@ -502,7 +503,7 @@ def run_lmto(**kwargs):
     plot_band_structure(".")
 
     # COHP
-    error_cohp = calc_COHPs(kwargs["cif_path"])
+    error_cohp = calc_COHPs(kwargs["cif_path"], kwargs["atom_site_data"])
 
     cleanup()
 
