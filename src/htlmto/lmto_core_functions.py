@@ -221,7 +221,7 @@ def run_lmbnd():
     return [error]
 
 
-def calc_COHPs(cifpath):
+def calc_COHPs(cifpath, site_data):
     ctrl = read_ctrl()
 
     class_dict = defaultdict(list)
@@ -235,7 +235,7 @@ def calc_COHPs(cifpath):
         class_dict[el].append([site, i])
         # sites.append([site, i])
 
-    max_distances = get_distances_from_cifkit(cifpath)
+    max_distances = get_distances_from_cifkit(cifpath, site_data)
 
     error = False
 
@@ -257,7 +257,7 @@ def calc_COHPs(cifpath):
             if not len(element2_sites):
                 continue
 
-            print(f"\n\t\tCalculating COHP for {element1:<2} - {element2:<2}")
+            print(f"\n\tCalculating COHP for {element1} - {element2}")
             class_pairs = []
             added_pairs = []
             for site1, class_num1 in element1_sites:
@@ -322,7 +322,8 @@ def calc_COHPs(cifpath):
                             "DATA.COHP", f"data.cohp_{element1}_{element2}"
                         )
 
-                        plot_cohps(".")
+    if not error:
+        plot_cohps(".")
 
     convert_cohp_files_to_csv()
 
@@ -387,7 +388,7 @@ def run_lmto(**kwargs):
     5. Run lm.run until it converges.
     """
 
-    print(f"\tName: {kwargs['name']}")
+    print(f"Name: {kwargs['name']}")
 
     # create dir
     name = f"{kwargs['name']}"
@@ -399,7 +400,10 @@ def run_lmto(**kwargs):
         except FileExistsError:
             os.chdir(name)
             for f in os.listdir("."):
-                os.remove(f)
+                if os.path.isdir(f):
+                    shutil.rmtree(f)
+                else:
+                    os.remove(f)
 
     error_init = run_lminit(**kwargs)[0]
 
@@ -502,7 +506,7 @@ def run_lmto(**kwargs):
     plot_band_structure(".")
 
     # COHP
-    error_cohp = calc_COHPs(kwargs["cif_path"])
+    error_cohp = calc_COHPs(kwargs["cif_path"], kwargs["atom_site_data"])
 
     cleanup()
 

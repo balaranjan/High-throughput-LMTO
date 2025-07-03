@@ -98,3 +98,5 @@ target/
 # Ipython Notebook
 .ipynb_checkpoints
 source.tar.gz
+
+tests/cifs/Ba3As2O.cif

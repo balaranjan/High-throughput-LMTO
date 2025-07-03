@@ -316,13 +316,10 @@ def plot_dos(calc_dir):
 
         plt.tight_layout()
 
-        if include_e:
-            output_filename = os.path.join(calc_dir, "DOS.png")
-        else:
-            output_filename = os.path.join(calc_dir, "DOS_without_E.png")
+        output_filename = f"DOS{'' if include_e else '_without_E'}.png"
 
         plt.savefig(output_filename, dpi=300)
-        print(f"Plot saved to: {output_filename}")
+        print(f"\t\tSaving  {output_filename}")
         plt.close(fig)
 
     plot(include_e=True)
@@ -408,10 +405,10 @@ def plot_band_structure(calc_dir):
 
         plt.tight_layout()
 
-        save_path = os.path.join(calc_dir, "Bandstructure.png")
+        save_path = "Bandstructure.png"
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
 
-        print(f"Plot saved to: {save_path}")
+        print(f"\t\tSaving {save_path}")
         plt.close(fig)
     except Exception as e:
         print("Error while plotting band structure.")
@@ -533,9 +530,9 @@ def plot_cohps(calc_dir):
         )
 
         plt.tight_layout()
-        save_path = os.path.join(calc_dir, "COHP.png")
+        save_path = "COHP.png"
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
-        print(f"Plot saved to: {save_path}")
+        print(f"\t\tSaving  {save_path}")
         plt.close(fig)
     except Exception as e:
         print("Error while plotting COHP.")
