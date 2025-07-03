@@ -1,5 +1,6 @@
 from .base import CIF_Reader
 from collections import defaultdict
+import os
 
 
 class ICSD_reader(CIF_Reader):
@@ -35,7 +36,13 @@ class ICSD_reader(CIF_Reader):
             return value
 
     def get_id(self):
-        return self.get_block("database_code_ICSD")
+        name = self.get_block("database_code_ICSD")
+        file_name = self.filename.split(os.sep)[-1][:-4]
+        if name:
+            name += f"_{file_name}"
+        else:
+            name = file_name
+        return name
 
     def get_formula_dict(self):
         value = self.get_block("chemical_formula_sum")

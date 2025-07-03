@@ -16,8 +16,8 @@ class CIF_Reader(ABC):
         # data
         self.data_source = data_source
         self.formula_dict = self.get_formula_dict()
-        self.id = self.get_id()
         self.formula = self.get_formula()
+        self.id = self.get_id()
         Z, num_atoms = self.get_no_of_atoms()
         self.Z = Z
         self.num_atoms = num_atoms
