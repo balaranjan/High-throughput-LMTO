@@ -257,7 +257,7 @@ def calc_COHPs(cifpath, site_data):
             if not len(element2_sites):
                 continue
 
-            print(f"\n\t\tCalculating COHP for {element1:<2} - {element2:<2}")
+            print(f"\n\tCalculating COHP for {element1} - {element2}")
             class_pairs = []
             added_pairs = []
             for site1, class_num1 in element1_sites:
@@ -388,7 +388,7 @@ def run_lmto(**kwargs):
     5. Run lm.run until it converges.
     """
 
-    print(f"\tName: {kwargs['name']}")
+    print(f"Name: {kwargs['name']}")
 
     # create dir
     name = f"{kwargs['name']}"
@@ -400,7 +400,10 @@ def run_lmto(**kwargs):
         except FileExistsError:
             os.chdir(name)
             for f in os.listdir("."):
-                os.remove(f)
+                if os.path.isdir(f):
+                    shutil.rmtree(f)
+                else:
+                    os.remove(f)
 
     error_init = run_lminit(**kwargs)[0]
 

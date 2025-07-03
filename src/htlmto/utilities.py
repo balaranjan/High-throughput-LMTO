@@ -50,22 +50,32 @@ def get_d_by_dmin_CN(v):
 
 def get_distances_from_cifkit(cifpath, site_data):
 
-    print(site_data)
-
     cif = Cif(cifpath)
     cif.compute_connections()
+    unitcell_points = cif.unitcell_points
+
+    label_map = {}  # cifkit_label: lmto_label
+    for site in site_data:
+        coords = np.array([site["x"], site["y"], site["z"]])
+
+        for point in unitcell_points:
+            if np.allclose(np.array(point[:3]), coords):
+                label_map[point[-1]] = site["label"]
 
     max_distances = defaultdict(dict)
     # {site: {site1: d1, site2: d2, ...}, site2: {}, ...}
     conns = cif.connections
     for k, v in conns.items():
+
         cn = get_d_by_dmin_CN(v)
 
         v = sorted([p[:2] for p in v], key=lambda x: x[1])[:cn]
         for _site in set([_v[0] for _v in v]):
             neigh_d_w_site_label = [_v[1] for _v in v if _v[0] == _site]
             # print(k, _site, max(neigh_d_w_site_label), neigh_d_w_site_label)
-            max_distances[k][_site] = max(neigh_d_w_site_label)
+            max_distances[label_map[k]][label_map[_site]] = max(
+                neigh_d_w_site_label
+            )
 
     return dict(max_distances)
 
@@ -108,7 +118,7 @@ def convert_cohp_files_to_csv():
     ]
     for _file in files:
         name = f"COHP_{_file[10:]}.csv"
-        print(_file, name)
+
         df = pd.read_csv(
             _file,
             header=0,
