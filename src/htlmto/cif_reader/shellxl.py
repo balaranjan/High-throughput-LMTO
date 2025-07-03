@@ -39,10 +39,9 @@ class SXL_reader(CIF_Reader):
         name = self.get_block("database_code_ID")
         file_name = self.filename.split(os.sep)[-1][:-4]
         if name:
-            name += f"_{file_name}"
-        else:
-            name = file_name
-        return name
+            file_name += f"_{name}"
+
+        return file_name
 
     def get_formula_dict(self):
         value = self.get_block("chemical_formula_sum")

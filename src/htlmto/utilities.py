@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 from collections import defaultdict
 from cifkit import Cif
-import datetime
 from .cif_reader import read_cif
 import shutil
 import os
@@ -90,10 +89,10 @@ def extract_data_from_cif(cif_path):
 
     cell = cif.cell
 
-    if cif.id:
+    if str(cif.id).isnumeric():
         name = f"{cif.formula}-{cif.id}"
     else:
-        name = f"{cif.formula}-{str(datetime.datetime.now())[:-7]}"
+        name = f"{cif.id}-{cif.formula}"
 
     data = {
         "_cell_length_a": cell[0],

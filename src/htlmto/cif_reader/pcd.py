@@ -36,11 +36,11 @@ class PCD_reader(CIF_Reader):
         name = self.get_block("database_code_PCD")
         file_name = self.filename.split(os.sep)[-1][:-4]
 
-        name_diff = file_name.replace(str(name), "")
+        name_diff = str(name).replace(str(file_name), "")
         if name_diff:
-            name += f"_{name_diff}"
+            file_name += f"_{name_diff}"
 
-        return name
+        return file_name
 
     def get_formula_dict(self):
         value = self.get_block("chemical_formula_sum")

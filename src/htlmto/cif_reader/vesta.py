@@ -39,11 +39,9 @@ class VESTA_reader(CIF_Reader):
         name = self.get_block("database_code_PCD")
         file_name = self.filename.split(os.sep)[-1][:-4]
         if name:
-            name += f"_{file_name}"
-        else:
-            name = file_name
+            file_name += f"_{name}"
 
-        return name
+        return file_name
 
     def get_formula_dict(self):
         value = self.get_block("_chemical_name_common")
