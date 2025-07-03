@@ -3,7 +3,7 @@ from collections import defaultdict
 import os
 
 
-class PCD_reader(CIF_Reader):
+class VESTA_reader(CIF_Reader):
 
     def __init__(self, filename, data_source, verbose=False):
         super().__init__(filename, data_source=data_source, verbose=verbose)
@@ -15,6 +15,9 @@ class PCD_reader(CIF_Reader):
             if block_name in line:
                 i_start = i
                 break
+
+        if not i_start:
+            return
 
         for i, line in enumerate(self.lines[i_start + 1 :]):
             if (
@@ -35,25 +38,29 @@ class PCD_reader(CIF_Reader):
     def get_id(self):
         name = self.get_block("database_code_PCD")
         file_name = self.filename.split(os.sep)[-1][:-4]
-
-        name_diff = str(name).replace(str(file_name), "")
-        if name_diff:
-            file_name += f"_{name_diff}"
+        if name:
+            file_name += f"_{name}"
 
         return file_name
 
     def get_formula_dict(self):
-        value = self.get_block("chemical_formula_sum")
+        value = self.get_block("_chemical_name_common")
         return dict(self._parse_formula(value))
 
     def get_no_of_atoms(self):
-        num_formula_unit = float(self.get_block("cell_formula_units_Z"))
+        num_formula_unit = self.get_block("cell_formula_units_Z")
+        if num_formula_unit:
+            num_formula_unit = float(num_formula_unit)
+        else:
+            num_formula_unit = 1
+
         atoms_in_formula = sum(self.formula_dict.values())
 
         return num_formula_unit, num_formula_unit * atoms_in_formula
 
     def get_space_group_no(self):
-        return self.get_block("space_group_IT_number")
+        value = self.get_block("space_group_IT_number")
+        return " ".join(value[0].split()[1:])
 
     def get_structure_type(self):
         return self.get_block("chemical_name_structure_type")
@@ -91,7 +98,9 @@ class PCD_reader(CIF_Reader):
                 break
 
         for i, line in enumerate(self.lines[i_start + 1 :]):
-            if line.startswith("_") and "atom_site" not in line:
+            if (
+                line.startswith("_") and "atom_site" not in line
+            ) or "loop_" in line:
                 i_end = i + i_start + 1
                 break
 
@@ -103,6 +112,8 @@ class PCD_reader(CIF_Reader):
             .replace("atom site ", "")
             for line in values
             if "atom_site" in line
+            and "atom_site_aniso" not in line
+            and "atom_site_iso" not in line
         ]
 
         site_labels = defaultdict(int)
@@ -121,10 +132,16 @@ class PCD_reader(CIF_Reader):
 
         for site in values[len(headers) :]:
             site = site.replace("\n", "").strip().split()
+
             if not len(site):
                 continue
             _site_values = {}
+
             for header, value in zip(headers, site):
+
+                if header not in header_map:
+                    continue
+
                 header = header_map[header]
 
                 if header == "label":
@@ -143,3 +160,11 @@ class PCD_reader(CIF_Reader):
             site_data.append(_site_values)
 
         return site_data
+
+
+if __name__ == "__main__":
+    cr = VESTA_reader(
+        filename="../../../tests/cifs/0.0GPA_Ba2Zn2As2O_file2.cif",
+        data_source="VESTA",
+        verbose=True,
+    )

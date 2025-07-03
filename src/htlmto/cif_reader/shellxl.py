@@ -1,5 +1,6 @@
 from .base import CIF_Reader
 from collections import defaultdict
+import os
 
 
 class SXL_reader(CIF_Reader):
@@ -35,7 +36,12 @@ class SXL_reader(CIF_Reader):
             return value
 
     def get_id(self):
-        return self.get_block("database_code_ID")
+        name = self.get_block("database_code_ID")
+        file_name = self.filename.split(os.sep)[-1][:-4]
+        if name:
+            file_name += f"_{name}"
+
+        return file_name
 
     def get_formula_dict(self):
         value = self.get_block("chemical_formula_sum")
