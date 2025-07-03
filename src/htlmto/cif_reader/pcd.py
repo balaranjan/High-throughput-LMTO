@@ -40,7 +40,6 @@ class PCD_reader(CIF_Reader):
         if name_diff:
             name += f"_{name_diff}"
 
-        name += f"_{self.formula}"
         return name
 
     def get_formula_dict(self):

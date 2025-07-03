@@ -43,8 +43,6 @@ class VESTA_reader(CIF_Reader):
         else:
             name = file_name
 
-        name += f"_{self.formula}"
-
         return name
 
     def get_formula_dict(self):

@@ -42,6 +42,7 @@ class ICSD_reader(CIF_Reader):
             name += f"_{file_name}"
         else:
             name = file_name
+
         return name
 
     def get_formula_dict(self):
