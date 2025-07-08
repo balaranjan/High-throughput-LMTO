@@ -59,8 +59,7 @@ class Critic_reader(CIF_Reader):
         return num_formula_unit, num_formula_unit * atoms_in_formula
 
     def get_space_group_no(self):
-        value = self.get_block("space_group_IT_number")
-        return " ".join(value[0].split()[1:])
+        return self.get_block("space_group_IT_number")
 
     def get_structure_type(self):
         return self.get_block("chemical_name_structure_type")
@@ -162,9 +161,9 @@ class Critic_reader(CIF_Reader):
         return site_data
 
 
-if __name__ == "__main__":
-    cr = Critic_reader(
-        filename="../../../tests/cifs/2221_As_p0.cif",
-        data_source="Critic",
-        verbose=True,
-    )
+# if __name__ == "__main__":
+#     cr = Critic_reader(
+#         filename="../../../tests/cifs/2221_As_p0.cif",
+#         data_source="Critic",
+#         verbose=True,
+#     )
