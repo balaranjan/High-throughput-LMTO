@@ -1,4 +1,4 @@
-from base import CIF_Reader
+from .base import CIF_Reader
 from collections import defaultdict
 import os
 
@@ -161,9 +161,9 @@ class Critic_reader(CIF_Reader):
         return site_data
 
 
-if __name__ == "__main__":
-    cr = Critic_reader(
-        filename="../../../tests/cifs/2221_As_p0.cif",
-        data_source="Critic",
-        verbose=True,
-    )
+# if __name__ == "__main__":
+#     cr = Critic_reader(
+#         filename="../../../tests/cifs/2221_As_p0.cif",
+#         data_source="Critic",
+#         verbose=True,
+#     )
