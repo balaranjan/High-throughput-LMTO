@@ -1,4 +1,4 @@
-from .base import CIF_Reader
+from base import CIF_Reader
 from collections import defaultdict
 import os
 
@@ -59,8 +59,7 @@ class Critic_reader(CIF_Reader):
         return num_formula_unit, num_formula_unit * atoms_in_formula
 
     def get_space_group_no(self):
-        value = self.get_block("space_group_IT_number")
-        return " ".join(value[0].split()[1:])
+        return self.get_block("space_group_IT_number")
 
     def get_structure_type(self):
         return self.get_block("chemical_name_structure_type")
