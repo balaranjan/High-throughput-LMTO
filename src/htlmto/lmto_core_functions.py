@@ -425,6 +425,7 @@ def run_lmto(**kwargs):
     else:
         # set VERBOSE to 50
         n_try = 1
+        last_OMMAX_issue = None
         print(f"\t\tVOLSPH_by_VOL={VOLSPH_by_VOL}, overlap={overlap}")
         while (
             VOLSPH_by_VOL is not None and VOLSPH_by_VOL < 100.0 and n_try < 30
@@ -432,7 +433,13 @@ def run_lmto(**kwargs):
             print(f"\tRunning lmes.run and lmovl.run, iteration {n_try}")
             error_ctl = run_lmctl()[0]
             if len(issues):
-                # print(f"\tChanging params based on recomendations {issues}")
+                if last_OMMAX_issue is None:
+                    last_OMMAX_issue = issues
+                elif last_OMMAX_issue == issues:
+                    error_hart, VOLSPH_by_VOL = run_lmhart()
+                    if error_hart:
+                        print(f"{kwargs['name']} failed")
+                        return True
                 modify_CTRL_file(**issues)
 
             error_es, VOLSPH_by_VOL = run_lmes(iteration=n_try)
