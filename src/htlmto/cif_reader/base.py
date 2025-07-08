@@ -75,6 +75,8 @@ class CIF_Reader(ABC):
 
     def has_defect(self):
         for site in self.site_data:
+            if "occupancy" not in site:
+                return None
             if site["occupancy"] != 1.0:
                 return True
         return False

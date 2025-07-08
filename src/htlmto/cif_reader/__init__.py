@@ -2,6 +2,7 @@ from .pcd import PCD_reader
 from .icsd import ICSD_reader
 from .shellxl import SXL_reader
 from .vesta import VESTA_reader
+from .critic import Critic_reader
 import os
 
 
@@ -32,6 +33,10 @@ def read_cif(filename, verbose=False):
         if verbose:
             print(" is from VESTA")
         return VESTA_reader(filename, data_source="VESTA", verbose=verbose)
+    elif "critic2" in contents:
+        if verbose:
+            print(" is from Critic2")
+        return Critic_reader(filename, data_source="Critic2", verbose=verbose)
     else:
         print(f"File {filename} form unknown source.")
         return
