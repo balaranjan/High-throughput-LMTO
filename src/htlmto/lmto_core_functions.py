@@ -235,7 +235,12 @@ def calc_COHPs(cifpath, site_data):
         class_dict[el].append([site, i])
         # sites.append([site, i])
 
-    max_distances = get_distances_from_cifkit(cifpath, site_data)
+    try:
+        max_distances = get_distances_from_cifkit(cifpath, site_data)
+    except Exception as e:
+        print("\tError getting max distances")
+        print(e)
+        return True
 
     error = False
 
