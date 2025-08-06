@@ -104,7 +104,17 @@ or
 htlmto my_directory_with_multiple_cifs
 ```
 
-The steps to perform an LMTO calculation are as follows:
+### Origin Choice
+The origin choice can be changed by either editing the cif
+<br/>
+change `_space_group_name_H-M_alt                'F d -3 m'` to `_space_group_name_H-M_alt                'F d -3 m (origin choice 2)'`
+<br/>
+or use the `--force-O2` flag (this does not change the basis).
+
+
+### What `htlmto` does?
+
+It performs the following steps:
 
 1. Write the INIT file and run lminit.run to initialize CTRL and CBAK files.
 2. Run lmhart.run and get the VOLSPH_by_VOL
