@@ -45,6 +45,10 @@ class SXL_reader(CIF_Reader):
 
     def get_formula_dict(self):
         value = self.get_block("chemical_formula_sum")
+        if isinstance(value, list):
+            value = [v for v in value if "sum" not in v][0]
+            for char in ["'", "\n"]:
+                value = value.replace(char, "")
         return dict(self._parse_formula(value))
 
     def get_no_of_atoms(self):
