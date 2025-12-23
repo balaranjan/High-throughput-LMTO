@@ -72,8 +72,8 @@ def get_distances_from_cifkit(cifpath, site_data):
         for _site in set([_v[0] for _v in v]):
             neigh_d_w_site_label = [_v[1] for _v in v if _v[0] == _site]
             # print(k, _site, max(neigh_d_w_site_label), neigh_d_w_site_label)
-            max_distances[label_map[k]][label_map[_site]] = max(
-                neigh_d_w_site_label
+            max_distances[label_map[k]][label_map[_site]] = (
+                max(neigh_d_w_site_label) * 1.10
             )
 
     return dict(max_distances)
