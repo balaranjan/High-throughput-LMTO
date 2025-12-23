@@ -40,7 +40,19 @@ def main():
         "--force-O2", help="Force origin choice 2", action="store_true"
     )
 
+    parser.add_argument(
+        "-s",
+        "--sub-elements",
+        help="Element substitution. e.g. Ce-La Nd-La to use \
+            La in place of Ce and Nd.",
+    )
+
     args = parser.parse_args()
+
+    ele_subs = None
+    if args.sub_elements:
+        ele_subs = args.sub_elements.split()
+        ele_subs = {e.split("-")[0]: e.split("-")[1] for e in ele_subs}
 
     if os.path.isfile(args.input_path):
         cif_data = extract_data_from_cif(args.input_path)
@@ -75,6 +87,7 @@ def main():
                 cif_data = extract_data_from_cif(f"{full_path}{os.sep}{cif}")
                 cif_data["calc_path"] = full_path
                 cif_data["cif_path"] = f"{full_path}{os.sep}{cif}"
+                cif_data["sub_elements"] = ele_subs
                 if args.force_O2:
                     cif_data["origin"] = 2
                 tasks.append(cif_data)
