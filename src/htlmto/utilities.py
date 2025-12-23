@@ -150,3 +150,49 @@ def cleanup():
     for _file in files:
         if not _file[-4:] in file_types:
             shutil.move(_file, f"calculation{os.sep}{_file}")
+
+
+def write_cif(cif):
+    with open(f"temp_{cif.id}.cif", "w") as cf:
+        cf.write(f"{'_chemical_formula_sum':<42} {cif.formula}\n")
+        cf.write("\n\n")
+
+        for i, ax in enumerate(["a", "b", "c"]):
+            cf.write(f"_cell_length_{ax:<29} {cif.cell[i]}\n")
+
+        for i, an in enumerate(["alpha", "beta", "gamma"]):
+            cf.write(f"_cell_angle_{an:<30} {cif.cell[i+3]}\n")
+
+        cf.write(f"{'cell_formula_units_Z':<42} {cif.Z:.0f}\n")
+        cf.write(f"{'_space_group_IT_number':<42} {cif.space_group_number}\n")
+
+        cf.write(
+            """
+loop_
+ _atom_site_label
+ _atom_site_type_symbol
+ _atom_site_symmetry_multiplicity
+ _atom_site_Wyckoff_symbol
+ _atom_site_fract_x
+ _atom_site_fract_y
+ _atom_site_fract_z
+ _atom_site_occupancy
+            """
+        )
+        print(cif.site_data)
+
+        for site in cif.site_data:
+            cf.write(
+                f"{site['label']} {site['symbol']} \
+                    {site['multiplicity']} {site['Wyckoff_symbol']} \
+                    {site['x']} {site['y']} {site['z']} \
+                        {site.get('occupancy', 1)}\n"
+            )
+
+
+if __name__ == "__main__":
+
+    cif = read_cif(
+        "/home/bala/Documents/22_lmto/htlmto/tests/cifs/2221_As_p0.cif"
+    )
+    write_cif(cif)
