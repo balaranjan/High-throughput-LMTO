@@ -253,7 +253,7 @@ def write_INIT_file(**kwargs):
 
         if S != site["symbol"]:
             out_subs[site["symbol"]] = S
-            print(f"{site['symbol']} is substituted with {S}")
+            print(f"{site['symbol']} is substituted with {S}", end=" ")
 
         lines.append(
             f"          ATOM={site['label']:<3}  \
@@ -267,7 +267,7 @@ def write_INIT_file(**kwargs):
     if len(out_subs):
         with open("SUBS", "w") as f:
             for k, v in out_subs.items():
-                f.write("{k}: {v}\n")
+                f.write(f"{k}: {v}\n")
 
     return True
 

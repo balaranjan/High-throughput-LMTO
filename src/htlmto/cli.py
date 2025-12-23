@@ -43,8 +43,8 @@ def main():
     parser.add_argument(
         "-s",
         "--sub-elements",
-        help="Element substitution. e.g. Ce-La Nd-La to use \
-            La in place of Ce and Nd.",
+        help='Element substitution. e.g. "Ce-La Nd-La" to use \
+            La in place of Ce and Nd.',
     )
 
     args = parser.parse_args()
@@ -63,6 +63,7 @@ def main():
         if cif_data:
             cif_data["calc_path"] = os.getcwd()
             cif_data["cif_path"] = os.path.join(os.getcwd(), args.input_path)
+            cif_data["sub_elements"] = ele_subs
 
             run_lmto(**cif_data)
 
