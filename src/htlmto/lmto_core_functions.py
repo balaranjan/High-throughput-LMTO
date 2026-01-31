@@ -247,6 +247,7 @@ def calc_COHPs(cifpath, site_data):
     print("\tCalculated max interaction distances (A): ")
 
     for k, v in max_distances.items():
+        v = ", ".join([f"{_k}: {_v:.2f}" for _k, _v in v.items()])
         print(f"\t\t{k:<3} : {v}")
 
     # CLASS1=1 CLASS2=1 DIMIN=.5 DIMAX=.6

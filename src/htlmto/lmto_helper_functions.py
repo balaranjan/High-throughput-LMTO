@@ -68,25 +68,21 @@ def write_INIT_file(**kwargs):
         "Cs": 55,
         "Ba": 56,
         "La": 57,
-        #   'Ce': 58, 'Pr': 59, 'Nd': 60, 'Pm':
-        # 61, 'Sm': 62, 'Eu': 63, 'Gd': 64,
-        #   'Tb': 65, 'Dy': 66, 'Ho': 67, 'Er': 68,
-        # 'Tm': 69, 'Yb': 70, 'Lu': 71,
-        "Ce": 57,
-        "Pr": 57,
-        "Nd": 57,
-        "Pm": 57,
-        "Sm": 57,
-        "Eu": 57,
-        "Gd": 57,
-        "Tb": 57,
-        "Dy": 57,
-        "Ho": 57,
-        "Er": 57,
-        "Tm": 57,
-        "Yb": 57,
-        "Lu": 57,
-        "Hf": 40,  # 'Hf': 72,
+        "Ce": 58,
+        "Pr": 59,
+        "Nd": 60,
+        "Pm": 61,
+        "Sm": 62,
+        "Eu": 63,
+        "Gd": 64,
+        "Tb": 65,
+        "Dy": 66,
+        "Ho": 67,
+        "Er": 68,
+        "Tm": 69,
+        "Yb": 70,
+        "Lu": 71,
+        "Hf": 72,
         "Ta": 73,
         "W": 74,
         "Re": 75,
@@ -104,40 +100,70 @@ def write_INIT_file(**kwargs):
         "Fr": 87,
         "Ra": 88,
         "Ac": 89,
-        #   'Th': 90, 'Pa': 91, 'U': 92, 'Np': 93,
-        # 'Pu': 94, 'Am': 95, 'Cm': 96,
-        #   'Bk': 97, 'Cf': 98, 'Es': 99, 'Fm': 100,
-        # 'Md': 101, 'No': 102, 'Lr': 103,
-        "Th": 89,
-        "Pa": 89,
-        "U": 89,
-        "Np": 89,
-        "Pu": 89,
-        "Am": 89,
-        "Cm": 89,
-        "Bk": 89,
-        "Cf": 89,
-        "Es": 89,
-        "Fm": 89,
-        "Md": 89,
-        "No": 89,
-        "Lr": 89,
-        "Rf": 104,
-        "Db": 105,
-        "Sg": 106,
-        "Bh": 107,
-        "Hs": 108,
-        "Mt": 109,
-        "Ds": 110,
-        "Rg": 111,
-        "Cn": 112,
-        "Nh": 113,
-        "Fl": 114,
-        "Mc": 115,
-        "Lv": 116,
-        "Ts": 117,
-        "Og": 118,
+        "Th": 90,
+        "Pa": 91,
+        "U": 92,
+        # "Np": 93,
+        # "Pu": 94,
+        # "Am": 95,
+        # "Cm": 96,
+        # "Bk": 97,
+        # "Cf": 98,
+        # "Es": 99,
+        # "Fm": 100,
+        # "Md": 101,
+        # "No": 102,
+        # "Lr": 103,
+        # "Rf": 104,
+        # "Db": 105,
+        # "Sg": 106,
+        # "Bh": 107,
+        # "Hs": 108,
+        # "Mt": 109,
+        # "Ds": 110,
+        # "Rg": 111,
+        # "Cn": 112,
+        # "Nh": 113,
+        # "Fl": 114,
+        # "Mc": 115,
+        # "Lv": 116,
+        # "Ts": 117,
+        # "Og": 118,
     }
+
+    common_subs = {
+        "Ce": "La",
+        "Pr": "La",
+        "Nd": "La",
+        "Pm": "La",
+        "Sm": "La",
+        "Eu": "La",
+        "Gd": "La",
+        "Tb": "Lu",
+        "Dy": "Lu",
+        "Ho": "Lu",
+        "Er": "Lu",
+        "Tm": "Lu",
+        "Yb": "Lu",
+        "Lu": "Lu",
+        "Hf": "Zr",
+        "Th": "Ac",
+        "Pa": "Ac",
+        "U": "Ac",
+        "Np": "Ac",
+        "Pu": "Ac",
+        "Am": "Ac",
+        "Cm": "Ac",
+        "Bk": "Ac",
+        "Cf": "Ac",
+        "Es": "Ac",
+        "Fm": "Ac",
+        "Md": "Ac",
+        "No": "Ac",
+        "Lr": "Ac",
+    }
+
+    element_subs = kwargs.pop("sub_elements")
 
     space_group_nums_params = {}
 
@@ -215,15 +241,33 @@ def write_INIT_file(**kwargs):
     first_ln += "\n"
     lines.append(first_ln)
 
+    out_subs = {}
     for site in kwargs["atom_site_data"]:
+        S = site["symbol"]
+
+        if element_subs and S in element_subs:
+            S = element_subs.get(S)
+
+        elif S in common_subs:
+            S = common_subs.get(S)
+
+        if S != site["symbol"]:
+            out_subs[site["symbol"]] = S
+            print(f"{site['symbol']} is substituted with {S}", end=" ")
+
         lines.append(
             f"          ATOM={site['label']:<3}  \
-                Z={atomic_numbers[site['symbol']]:<3}   \
+                Z={atomic_numbers[S]:<3}   \
                     X={site['x']} {site['y']} {site['z']}\n"
         )
 
     with open("INIT", "w") as f:
         f.writelines(lines)
+
+    if len(out_subs):
+        with open("SUBS", "w") as f:
+            for k, v in out_subs.items():
+                f.write(f"{k}: {v}\n")
 
     return True
 
