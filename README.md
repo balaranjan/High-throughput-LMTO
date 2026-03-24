@@ -105,12 +105,12 @@ htlmto my_directory_with_multiple_cifs
 ```
 
 ### Origin Choice
+
 The origin choice can be changed by either editing the cif
 <br/>
 change `_space_group_name_H-M_alt                'F d -3 m'` to `_space_group_name_H-M_alt                'F d -3 m (origin choice 2)'`
 <br/>
 or use the `--force-O2` flag (this does not change the basis).
-
 
 ### What `htlmto` does?
 

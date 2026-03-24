@@ -216,37 +216,54 @@ def get_nonzero_integer_ticks(x_min, x_max, n_ticks=4):
     if n_ticks < 1 or x_max <= x_min:
         return []
 
-    nice_intervals = [1, 2, 3, 4, 5, 10, 15, 20, 25, 50, 100, 150, 200, 250, 500, 1000]
-    
+    nice_intervals = [
+        1,
+        2,
+        3,
+        4,
+        5,
+        10,
+        15,
+        20,
+        25,
+        50,
+        100,
+        150,
+        200,
+        250,
+        500,
+        1000,
+    ]
+
     ideal_interval = (x_max - x_min) / n_ticks
     interval = min(nice_intervals, key=lambda x: abs(x - ideal_interval))
-    
+
     ticks = []
-    
+
     if x_min < 0:
         tick = -interval
         while tick >= x_min:
             if tick != 0:
                 ticks.append(tick)
             tick -= interval
-    
+
     tick = interval
     while tick <= x_max:
         if tick != 0:
             ticks.append(tick)
         tick += interval
-    
+
     ticks = sorted(set(ticks))
-    
+
     if len(ticks) <= n_ticks:
         return ticks
-    
+
     step = len(ticks) // n_ticks
     selected = [ticks[i * step] for i in range(n_ticks)]
-    
+
     if ticks[-1] not in selected:
         selected[-1] = ticks[-1]
-    
+
     return sorted(set(selected))
 
 
