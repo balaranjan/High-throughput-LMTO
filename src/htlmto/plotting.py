@@ -356,8 +356,8 @@ def plot_dos(calc_dir):
         legend = ax.legend(
             frameon=False,
             fontsize=30,
-            loc="lower right",
-            handlelength=0.65,
+            loc="best",
+            handlelength=0.75,
             columnspacing=0.1,
         )
         legend.set_zorder(99)
@@ -572,8 +572,8 @@ def plot_cohps(calc_dir):
         legend = ax.legend(
             frameon=False,
             fontsize=30,
-            loc="lower left",
-            handlelength=0.65,
+            loc="best",
+            handlelength=0.75,
             columnspacing=0.1,
         )
         legend.set_zorder(99)
