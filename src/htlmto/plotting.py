@@ -288,7 +288,7 @@ def plot_dos(calc_dir):
         legend = ax.legend(
             frameon=True,
             fontsize=30,
-            loc="lower right",
+            loc="best",
             handlelength=0.75,
             columnspacing=0.1,
             facecolor="white",
@@ -501,7 +501,7 @@ def plot_cohps(calc_dir):
         legend = ax.legend(
             frameon=True,
             fontsize=30,
-            loc="lower left",
+            loc="best",
             handlelength=0.75,
             columnspacing=0.1,
             facecolor="white",
