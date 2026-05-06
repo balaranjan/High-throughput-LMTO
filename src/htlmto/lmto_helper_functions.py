@@ -4,6 +4,7 @@ import numpy as np
 import pexpect
 import shutil
 import os
+import re
 
 
 def write_INIT_file(**kwargs):
@@ -748,9 +749,17 @@ def get_band_structure(name):
     df_dos.to_csv("band_structure.csv", index=False)
 
 
-def process_COHP():
+def process_COHP(selected_interactions=None):
+
+    output = []
+
+    def capture_output(p):
+        """Helper to decode and append the received text before each prompt."""
+        if p.before:
+            output.append(p.before.decode("utf-8", errors="ignore"))
 
     p = pexpect.spawn("gnucohp.run", timeout=2)
+    # p.logfile_read = sys.stdout.buffer  # log all output to stdout
 
     p.expect("Enter output device:", timeout=2)
     p.sendline("1")
@@ -761,26 +770,100 @@ def process_COHP():
     p.expect("energies relative to EF", timeout=2)
     p.sendline("t")
 
-    p.expect("emin,emax", timeout=2)
+    p.expect(r"Examples:.*\r\n", timeout=10)  # match the examples line
+    if not selected_interactions:
+        capture_output(p)
+
+    if selected_interactions:
+        p.sendline(selected_interactions)
+    else:
+        p.sendline("/")
+
+    p.expect("Now enter weights for each COHP", timeout=10)
     p.sendline("/")
 
-    p.expect("Enter class of COHP", timeout=2)
+    # Energy range
+    p.expect("If desired, enter new min, max", timeout=10)
     p.sendline("/")
 
-    p.expect("Now enter weights for each COHP", timeout=2)
+    # COHP range
+    p.expect("If desired, enter new min, max", timeout=10)
     p.sendline("/")
 
-    p.expect("If desired, enter new min, max", timeout=2)
-    p.sendline("/")
+    p.expect("Plot also COHP integration", timeout=2)
+    p.sendline("t")  # use 'f' unless you actually need ICOHP plot
 
-    p.expect("min/max for COHP", timeout=2)
+    # ICOHP range
+    p.expect("If desired, enter new min, max", timeout=10)
     p.sendline("/")
-
-    p.expect(" Plot also COHP integration", timeout=2)
-    p.sendline("t")
 
     p.expect("if desired, enter new title", timeout=2)
     p.sendline("/")
 
     p.expect(pexpect.EOF)
-    return
+
+    if selected_interactions:
+        output = get_coph_at_ef_zero()
+
+    return output
+
+
+def parse_classes(coph_text):
+    results = []
+    for line in coph_text[0].split("\n")[1:]:
+        line = line.replace("COHP  are:", "")
+        m = re.match(
+            r"[^A-Za-z]*([A-Za-z0-9]+)\s*=\s*(\w+)-\d+/\s*(\w+)-\d+\s*.+:\s*([\d.]+)\s+Ang\.",  # noqa: E501
+            line,
+        )
+        if m:
+            results.append(
+                [m.group(1), f"{m.group(2)}-{m.group(3)}", float(m.group(4))]
+            )
+
+    return results
+
+
+def group_cohps(bonds):
+    """Group COHP bonds by Atom2 base name (after '-') and then by distance."""
+    groups = defaultdict(lambda: defaultdict(list))
+
+    for label, atom_pair, distance in bonds:
+        atom2_base = atom_pair.split("-")[
+            -1
+        ]  # Get part after first '-' (e.g., 'Er1' from 'In1-Er1')
+        groups[atom2_base][round(distance, 3)].append(label)
+
+    return dict(groups)
+
+
+def get_coph_at_ef_zero():
+    if not os.path.isfile("DATA.COHP"):
+        return (-2, -2)  # Return tuple indicating error
+
+    data_text = open("DATA.COHP", "r").read()
+    rows = []
+    for line in data_text.split("\n"):
+        parts = line.split()
+        if len(parts) >= 3:
+            e, col2_val, col3_val = map(float, parts[:3])
+            rows.append((e, col2_val, col3_val))
+
+    # Find crossing of 0 in energy (column 1)
+    for i in range(len(rows) - 1):
+        e1, c2_1, c3_1 = rows[i]
+        e2, c2_2, c3_2 = rows[i + 1]
+
+        if (e1 < 0 and e2 >= 0) or (e1 > 0 and e2 <= 0):
+            # Linear interpolation for col2 and col3 at e=0
+            frac = -e1 / (e2 - e1)
+            interpolated_c2 = c2_1 + (c2_2 - c2_1) * frac
+            interpolated_c3 = c3_1 + (c3_2 - c3_1) * frac
+            return (interpolated_c2, interpolated_c3)
+
+    return (-1, -1)
+
+
+if __name__ == "__main__":
+    parts = process_COHP()
+    parse_classes(parts)
