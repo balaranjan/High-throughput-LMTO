@@ -177,6 +177,18 @@ def get_element_color(label, elements):
         if label == elements[2]:
             return "red", "-"
     if element_count == 4:
+        # Check for specific combination: Cu, Cd, Sn, S
+        element_set = set(elements)
+        if element_set == {"Cu", "Cd", "Sn", "S"}:
+            if label == "Cu":
+                return "green", "-"
+            if label == "Cd":
+                return "blue", "-"
+            if label == "Sn":
+                return "red", "-"
+            if label == "S":
+                return "yellow", "-"
+        # Default behavior for element_count == 4
         if label == elements[0]:
             return "blue", "-"
         if label in transition_metals:
@@ -198,6 +210,61 @@ def get_element_color(label, elements):
         if label == elements[4]:
             return "orange", "-"
     return "pink", "-"
+
+
+def get_nonzero_integer_ticks(x_min, x_max, n_ticks=4):
+    if n_ticks < 1 or x_max <= x_min:
+        return []
+
+    nice_intervals = [
+        1,
+        2,
+        3,
+        4,
+        5,
+        10,
+        15,
+        20,
+        25,
+        50,
+        100,
+        150,
+        200,
+        250,
+        500,
+        1000,
+    ]
+
+    ideal_interval = (x_max - x_min) / n_ticks
+    interval = min(nice_intervals, key=lambda x: abs(x - ideal_interval))
+
+    ticks = []
+
+    if x_min < 0:
+        tick = -interval
+        while tick >= x_min:
+            if tick != 0:
+                ticks.append(tick)
+            tick -= interval
+
+    tick = interval
+    while tick <= x_max:
+        if tick != 0:
+            ticks.append(tick)
+        tick += interval
+
+    ticks = sorted(set(ticks))
+
+    if len(ticks) <= n_ticks:
+        return ticks
+
+    step = len(ticks) // n_ticks
+    selected = [ticks[i * step] for i in range(n_ticks)]
+
+    if ticks[-1] not in selected:
+        selected[-1] = ticks[-1]
+
+    return sorted(set(selected))
 
 
 def plot_dos(calc_dir):
@@ -273,10 +340,11 @@ def plot_dos(calc_dir):
 
         ax.set_ylim(-6, 2)
         ax.set_xlim(0, max_y + buffer)
+        dos_ticks = get_nonzero_integer_ticks(0, max_y + buffer, n_ticks=4)
+        if dos_ticks:
+            ax.set_xticks(dos_ticks)
         ax.axhline(0, color="black", linestyle="--", linewidth=3)
-        ax.tick_params(
-            axis="x", which="both", bottom=False, top=False, labelbottom=False
-        )
+        ax.tick_params(axis="x", labelsize=35, width=3, length=10)
         ax.tick_params(axis="y", labelsize=35, width=3, length=10)
 
         for spine in ax.spines.values():
@@ -286,12 +354,11 @@ def plot_dos(calc_dir):
         ax.yaxis.set_major_locator(MaxNLocator(integer=True))
 
         legend = ax.legend(
-            frameon=True,
+            frameon=False,
             fontsize=30,
-            loc="lower right",
+            loc="best",
             handlelength=0.75,
             columnspacing=0.1,
-            facecolor="white",
         )
         legend.set_zorder(99)
 
@@ -301,6 +368,7 @@ def plot_dos(calc_dir):
         )
         folder_name_cleaned = re.sub(r"(?<!\d)1$", "", folder_name_cleaned)
         ax.set_title("DOS", fontsize=35, pad=20)
+        ax.set_xlabel("states", fontsize=35)
 
         x_position = ax.get_xlim()[1]
         ax.annotate(
@@ -380,7 +448,7 @@ def plot_band_structure(calc_dir):
 
         ax.set_title("Band Structure", fontsize=20, pad=10)
         ax.set_xlim(x_min, x_max)
-        ax.set_ylim(-2.5, 2.5)
+        ax.set_ylim(-3.9, 3.9)
         ax.axhline(0, color="black", linewidth=1.5, linestyle="--", zorder=1)
 
         x_position = ax.get_xlim()[1]
@@ -484,11 +552,14 @@ def plot_cohps(calc_dir):
         max_x = max(all_x_values) if all_x_values else 1
         buffer = 0.1 * max_x
         ax.set_xlim(-(max_x + buffer), max_x + buffer)
+        cohp_ticks = get_nonzero_integer_ticks(
+            -(max_x + buffer), max_x + buffer, n_ticks=4
+        )
+        if cohp_ticks:
+            ax.set_xticks(cohp_ticks)
         ax.axhline(0, color="black", linestyle="--", linewidth=3)
         ax.axvline(0, color="black", linestyle="--", linewidth=3)
-        ax.tick_params(
-            axis="x", which="both", bottom=False, top=False, labelbottom=False
-        )
+        ax.tick_params(axis="x", labelsize=35, width=3, length=10)
         ax.tick_params(axis="y", labelsize=35, width=3, length=10)
 
         for spine in ax.spines.values():
@@ -499,12 +570,11 @@ def plot_cohps(calc_dir):
         ax.yaxis.set_major_locator(MaxNLocator(integer=True))
 
         legend = ax.legend(
-            frameon=True,
+            frameon=False,
             fontsize=30,
-            loc="lower left",
+            loc="best",
             handlelength=0.75,
             columnspacing=0.1,
-            facecolor="white",
         )
         legend.set_zorder(99)
 
@@ -531,7 +601,7 @@ def plot_cohps(calc_dir):
 
         plt.tight_layout()
         save_path = "COHP.png"
-        plt.savefig(save_path, dpi=300, bbox_inches="tight")
+        plt.savefig(save_path, dpi=300)
         print(f"\t\tSaving  {save_path}")
         plt.close(fig)
     except Exception as e:
