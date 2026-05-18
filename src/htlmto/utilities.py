@@ -42,6 +42,7 @@ def get_d_by_dmin_CN(v):
     ind_gaps = np.argsort(gaps)
 
     inner_gap_index = np.array(ind_gaps[::-1])
+    inner_gap_index = inner_gap_index[inner_gap_index >= 4]
     outer_CN = int(inner_gap_index[0]) + 1
 
     return outer_CN
@@ -64,11 +65,12 @@ def get_distances_from_cifkit(cifpath, site_data):
     max_distances = defaultdict(dict)
     # {site: {site1: d1, site2: d2, ...}, site2: {}, ...}
     conns = cif.connections
+    cn_conns = {}
     for k, v in conns.items():
 
         cn = get_d_by_dmin_CN(v)
-
         v = sorted([p[:2] for p in v], key=lambda x: x[1])[:cn]
+        cn_conns[k] = v
         for _site in set([_v[0] for _v in v]):
             neigh_d_w_site_label = [_v[1] for _v in v if _v[0] == _site]
             # print(k, _site, max(neigh_d_w_site_label), neigh_d_w_site_label)
@@ -76,7 +78,7 @@ def get_distances_from_cifkit(cifpath, site_data):
                 max(neigh_d_w_site_label) * 1.10
             )
 
-    return dict(max_distances)
+    return max_distances, cn_conns
 
 
 def extract_data_from_cif(cif_path):

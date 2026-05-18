@@ -18,6 +18,8 @@ from .lmto_helper_functions import process_dos_data
 from .lmto_helper_functions import process_COHP
 from .lmto_helper_functions import extract_scf_data
 from .lmto_helper_functions import get_band_structure
+from .lmto_helper_functions import parse_classes
+from .lmto_helper_functions import group_cohps
 from .plotting import plot_dos
 from .plotting import plot_cohps
 from .plotting import plot_band_structure
@@ -236,7 +238,7 @@ def calc_COHPs(cifpath, site_data):
         # sites.append([site, i])
 
     try:
-        max_distances = get_distances_from_cifkit(cifpath, site_data)
+        max_distances, cn_conns = get_distances_from_cifkit(cifpath, site_data)
     except Exception as e:
         print("\tError getting max distances")
         print(e)
@@ -251,6 +253,7 @@ def calc_COHPs(cifpath, site_data):
         print(f"\t\t{k:<3} : {v}")
 
     # CLASS1=1 CLASS2=1 DIMIN=.5 DIMAX=.6
+    all_pairs = []
     elements = list(class_dict.keys())
     for element1 in elements:
         element1_sites = class_dict[element1]
@@ -321,7 +324,24 @@ def calc_COHPs(cifpath, site_data):
 
                 if not error and not no_cohp_found:
                     shutil.copy("COHP", f"cohp_{element1}_{element2}")
-                    process_COHP()
+                    pairs = process_COHP()
+                    pairs = parse_classes(pairs)
+
+                    if pairs:
+                        groups = group_cohps(pairs)
+                        for s2, values in groups.items():
+                            for d, classes in values.items():
+                                cohp_val = process_COHP(" ".join(classes))
+                                all_pairs.append(
+                                    {
+                                        "s1": site1,
+                                        "s2": s2,
+                                        "count": len(classes),
+                                        "d": d,
+                                        "cohp_val": cohp_val[0],
+                                        "icohp_val": cohp_val[1],
+                                    }
+                                )
 
                     if os.path.isfile("DATA.COHP"):
                         shutil.move(
