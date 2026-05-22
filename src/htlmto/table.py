@@ -65,8 +65,8 @@ def create_word_table(site_conns, pair_cohp_vals, sample_name="SAMPLE_NAME"):
         condensed_interactions.sort(key=lambda x: (x[1], x[0]))
 
         condensed_dict[site] = condensed_interactions
-    for k, v in condensed_dict.items():
-        print(k, v)
+    # for k, v in condensed_dict.items():
+    #     print(k, v)
 
     doc = Document()
     total_entries = sum([len(v) for v in condensed_dict.values()])
@@ -86,8 +86,12 @@ def create_word_table(site_conns, pair_cohp_vals, sample_name="SAMPLE_NAME"):
     add_mixed_text(
         header_row.cells[3].paragraphs[0], [["d", "it-bold"], [" (Å)", "bold"]]
     )
-    add_mixed_text(header_row.cells[4].paragraphs[0], [["COHP", "bold"]])
-    add_mixed_text(header_row.cells[5].paragraphs[0], [["-ICOHP", "bold"]])
+    add_mixed_text(
+        header_row.cells[4].paragraphs[0], [["-COHP (per atom)", "bold"]]
+    )
+    add_mixed_text(
+        header_row.cells[5].paragraphs[0], [["-ICOHP (per atom)", "bold"]]
+    )
 
     for i in range(6):
         header_row.cells[i].bold = True
@@ -95,14 +99,15 @@ def create_word_table(site_conns, pair_cohp_vals, sample_name="SAMPLE_NAME"):
     target_row_idx = 0
     i = 0
     for site, neighbors in condensed_dict.items():
+        cohp_sum = []
+        first_row = None
         for j, entry in enumerate(neighbors):
-
             target_row_idx = i + 1
             col_offset = 0
             row = table.rows[target_row_idx]
 
             if j == 0:
-                row.cells[0 + col_offset].text = str(site)
+                first_row = row  # row.cells[0 + col_offset].text = str(site)
             if j == 1:
                 row.cells[0 + col_offset].text = "CN " + str(
                     sum([v[-1] for v in neighbors])
@@ -120,9 +125,14 @@ def create_word_table(site_conns, pair_cohp_vals, sample_name="SAMPLE_NAME"):
             val = sorted(val, key=lambda x: x[1])
             val = val[0]
 
+            cohp_sum.append(round(val[0], 2))
+
             row.cells[4 + col_offset].text = f"{val[0]/entry[2]:2.2f}"
             row.cells[5 + col_offset].text = f"{val[1]/entry[2]:2.2f}"
             i += 1
+
+        first_row.cells[0 + col_offset].text = f"{site} ({sum(cohp_sum):.2f})"
+        # B.O. = sum of icohp, wighted
 
     doc.save("cohp.docx")
 

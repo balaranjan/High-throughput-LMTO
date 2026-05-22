@@ -1,5 +1,7 @@
 from matplotlib import pyplot as plt
 from matplotlib.ticker import MaxNLocator
+from collections import defaultdict
+from math import ceil
 import pandas as pd
 import os
 import numpy as np
@@ -217,15 +219,26 @@ def get_nonzero_integer_ticks(x_min, x_max, n_ticks=4):
         return []
 
     nice_intervals = [
+        0.1,
+        0.2,
+        0.25,
+        1 / 3,
+        0.5,
+        2 / 3,
         1,
         2,
         3,
         4,
         5,
+        6,
         10,
+        12,
         15,
+        16,
         20,
         25,
+        30,
+        40,
         50,
         100,
         150,
@@ -261,8 +274,8 @@ def get_nonzero_integer_ticks(x_min, x_max, n_ticks=4):
     step = len(ticks) // n_ticks
     selected = [ticks[i * step] for i in range(n_ticks)]
 
-    if ticks[-1] not in selected:
-        selected[-1] = ticks[-1]
+    # if ticks[-1] not in selected:
+    #     selected[-1] = ticks[-1]
 
     return sorted(set(selected))
 
@@ -303,7 +316,7 @@ def plot_dos(calc_dir):
         )
         if all_y_values:
             max_y = max(all_y_values)
-            buffer = 0.1 * max_y
+            buffer = 0.05 * max_y
         else:
             print(
                 "No DOS data in the range -6 <= Energy <= 2. Skipping plot. "
@@ -483,7 +496,7 @@ def plot_band_structure(calc_dir):
         print(e)
 
 
-def plot_cohps(calc_dir):
+def plot_cohps(calc_dir, plot_icohp=True):
     try:
         cohp_files = [
             os.path.join(calc_dir, f)
@@ -491,7 +504,7 @@ def plot_cohps(calc_dir):
             if f.lower().startswith("data.cohp")
         ]
         if not cohp_files:
-            print("COHP file not found in:", calc_dir)
+            print("COHP file not found in:", os.getcwd())
             return
 
         plt.rcParams.update(
@@ -535,22 +548,34 @@ def plot_cohps(calc_dir):
                 color=color,
                 linewidth=5,
             )
+            energies = cohp_data["energy"].values
+            all_x_values.append(np.abs(cohp_data["cohp"].values).max())
+
             # Plot ICOHP (dashed, no legend)
-            ax.plot(
-                cohp_data["int_cohp"],
-                cohp_data["energy"],
-                color=color,
-                linewidth=3,
-                linestyle="--",
-                zorder=0,
-            )
-            all_x_values.extend(np.abs(cohp_data["cohp"].values))
-            all_x_values.extend(np.abs(cohp_data["int_cohp"].values))
+            if plot_icohp:
+                ax.plot(
+                    cohp_data["int_cohp"],
+                    cohp_data["energy"],
+                    color=color,
+                    linewidth=3,
+                    linestyle="--",
+                    zorder=0,
+                )
+                all_x_values.append(
+                    np.abs(
+                        cohp_data["int_cohp"].values[
+                            np.logical_and(energies >= -2.0, energies <= 6.0)
+                        ]
+                    ).max()
+                )
 
         # Set axis limits and style to match DOS plot
         ax.set_ylim(-6, 2)
         max_x = max(all_x_values) if all_x_values else 1
-        buffer = 0.1 * max_x
+        if plot_icohp:
+            buffer = 0.05 * max_x
+        else:
+            buffer = 0.1 * max_x
         ax.set_xlim(-(max_x + buffer), max_x + buffer)
         cohp_ticks = get_nonzero_integer_ticks(
             -(max_x + buffer), max_x + buffer, n_ticks=4
@@ -572,7 +597,7 @@ def plot_cohps(calc_dir):
         legend = ax.legend(
             frameon=False,
             fontsize=30,
-            loc="best",
+            loc="lower left",
             handlelength=0.75,
             columnspacing=0.1,
         )
@@ -600,10 +625,149 @@ def plot_cohps(calc_dir):
         )
 
         plt.tight_layout()
-        save_path = "COHP.png"
+        if plot_icohp:
+            save_path = "COHP(i).png"
+        else:
+            save_path = "COHP.png"
         plt.savefig(save_path, dpi=300)
         print(f"\t\tSaving  {save_path}")
         plt.close(fig)
     except Exception as e:
         print("Error while plotting COHP.")
         print(e)
+
+
+def group_neighbors(cn_conns):
+    """Group COHP bonds by Atom2 base name (after '-') and then by distance."""
+    cn_groups = {}
+    for site, neighbors in cn_conns.items():
+        groups = defaultdict(lambda: defaultdict(int))
+        for n_label, distance in neighbors:
+            groups[distance][n_label] += 1
+        cn_groups[site] = dict(groups)
+
+    return cn_groups
+
+
+def read_cohp_data(site1, site2, d, count):
+
+    names = [
+        name
+        for name in os.listdir(".")
+        if (f"data.site_cohp_{site1}_{site2}_{count}" in name)
+        or (f"data.site_cohp_{site2}_{site1}_{count}" in name)
+    ]
+    names = sorted(names, key=lambda name: abs(float(name.split("_")[-1]) - d))
+    # name = names[0]
+
+    if len(names) and os.path.isfile(names[0]):
+        name = names[0]
+        df = pd.read_csv(name, names=["energy", "cohp", "icohp"], sep=r"\s+")
+        df = df[(df["energy"] >= -6.0) & (df["energy"] <= 2.0)]
+        return df["energy"].values, df["cohp"].values, df["icohp"].values
+
+    print(f"Data for {site1, site2, d, count} not found!")
+    return None, None, None
+
+
+def get_ticks(xmax):
+
+    xmax = ceil(xmax)
+    if xmax == 6:
+        xmax = 5
+
+    interval = int(xmax // 2)
+    if interval == 0.0:
+        return [-1, -0.5, 0.5, 1]
+
+    _vals = [i for i in range(0, int(ceil(xmax)), interval) if i != 0]
+    if len(_vals) == 1:
+        _vals.insert(0, _vals[0] / 2)
+    vals = [-v for v in _vals[::-1]]
+    vals.extend(_vals)
+
+    return vals
+
+
+def plot_site_COHPs(cn_conns, label_map, plot_icohp=True):
+
+    cn_groups = group_neighbors(cn_conns)
+    color_cycle = ["red", "orange", "green", "blue", "purple", "pink"]
+
+    for site, dist_groups in cn_groups.items():
+        plt.close()
+        fig, ax = plt.subplots(figsize=(8, 15))
+        all_x_values = []
+        idx = 0
+        for d, neighbor_groups in dist_groups.items():
+            for nsite, count in neighbor_groups.items():
+                energy, cohp, icohp = read_cohp_data(site, nsite, d, count)
+                if energy is not None:
+                    color = color_cycle[idx % len(color_cycle)]
+                    all_x_values.append(np.abs(cohp).max())
+                    ax.plot(
+                        cohp,
+                        energy,
+                        lw=5,
+                        ls="-",
+                        label=f"{nsite} (\u00D7{count})\n{d:0.3f} \u00C5",
+                        c=color,
+                    )
+                    if plot_icohp:
+                        ax.plot(icohp, energy, lw=3, ls="--", c=color)
+                        all_x_values.append(icohp.max())
+                    idx += 1
+
+        # 0.05 within -6, 2
+        # do for gen COHP, DOS,  0.05
+
+        ax.set_ylim(-6, 2)
+        max_x = max(all_x_values) if all_x_values else 1
+        if plot_icohp:
+            buffer = 0.05 * max_x
+        else:
+            buffer = 0.1 * max_x
+        ax.set_xlim(-(max_x + buffer), max_x + buffer)
+        cohp_ticks = get_ticks(max_x + buffer)
+        if cohp_ticks:
+            ax.set_xticks(cohp_ticks)
+            tick_label = []
+            for v in cohp_ticks:
+                if abs(v - int(v)) == 0:
+                    tick_label.append(str(int(v)))
+                else:
+                    tick_label.append("")
+            ax.set_xticklabels(tick_label)
+        ax.axhline(0, color="black", linestyle="--", linewidth=3)
+        ax.axvline(0, color="black", linestyle="--", linewidth=3)
+        ax.tick_params(axis="x", labelsize=35, width=3, length=10)
+        ax.tick_params(axis="y", labelsize=35, width=3, length=10)
+
+        for spine in ax.spines.values():
+            spine.set_linewidth(2.5)
+
+        ax.set_ylabel("energy (eV)", fontsize=35)
+        ax.set_xlabel("-COHP", fontsize=35)
+        ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+
+        legend = ax.legend(
+            frameon=False,
+            fontsize=30,
+            loc="lower left",
+            handlelength=0.5,
+            columnspacing=0.1,
+            handletextpad=0.5,
+            bbox_to_anchor=(-0.05, 0.0),
+        )
+        legend.set_zorder(99)
+
+        plt.title(site, fontsize=35)
+        plt.tight_layout()
+
+        if plot_icohp:
+            fname = f"cohp(i)_{site}"
+        else:
+            fname = f"cohp_{site}"
+
+        print(f"\t\tSaving site cohp for {site}: {fname}")
+        plt.savefig(f"{fname}.png", dpi=300)

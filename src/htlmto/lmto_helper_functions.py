@@ -825,14 +825,10 @@ def parse_classes(coph_text):
 
 
 def group_cohps(bonds):
-    """Group COHP bonds by Atom2 base name (after '-') and then by distance."""
-    groups = defaultdict(lambda: defaultdict(list))
-
+    """Group COHP bonds by site pair and distance."""
+    groups = defaultdict(list)
     for label, atom_pair, distance in bonds:
-        atom2_base = atom_pair.split("-")[
-            -1
-        ]  # Get part after first '-' (e.g., 'Er1' from 'In1-Er1')
-        groups[atom2_base][round(distance, 3)].append(label)
+        groups[f"{atom_pair}-{round(distance, 3)}"].append(label)
 
     return dict(groups)
 
