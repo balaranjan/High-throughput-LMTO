@@ -281,7 +281,51 @@ def get_nonzero_integer_ticks(x_min, x_max, n_ticks=4):
     return sorted(set(selected))
 
 
-def plot_dos(calc_dir):
+def rescale_dos():
+
+    parser = argparse.ArgumentParser(
+        description="Rescale and plot the DOS \
+            ithin a specified energy range."
+    )
+
+    parser.add_argument(
+        "calc_dir",
+        type=str,
+        help="Path to the calculation directory",
+    )
+
+    parser.add_argument(
+        "emin",
+        type=float,
+        default=-6,
+        help="Minimum energy limit for the y-axis (in eV). Default: -3.9",
+    )
+
+    parser.add_argument(
+        "emax",
+        type=float,
+        default=2,
+        help="Maximum energy limit for the y-axis (in eV). Default: 3.9",
+    )
+
+    args = parser.parse_args()
+
+    calc_dir, emin, emax = args.calc_dir, args.emin, args.emax
+
+    if calc_dir == ".":
+        calc_dir = os.getcwd()
+
+    if "plots" in os.listdir(calc_dir):
+        plot_dos(f"{calc_dir}{os.sep}csv", emin, emax)
+    else:
+        for _calc in os.listdir(calc_dir):
+            _calc = os.path.join(calc_dir, _calc)
+            if not os.path.isdir(_calc):
+                continue
+            plot_dos(os.path.join(_calc, "csv"), emin, emax)
+
+
+def plot_dos(calc_dir, emin=-6, emax=2):
     def plot(include_e):
         dos_files = get_dos_files(calc_dir)
         if not dos_files:
@@ -302,7 +346,7 @@ def plot_dos(calc_dir):
 
             x = data["Energy"].values
             y = data["DOS"].values
-            all_y_values.extend(y[(x >= -6) & (x <= 2)])
+            all_y_values.extend(y[(x >= emin) & (x <= emax)])
 
             label = os.path.splitext(os.path.basename(filename))[0].replace(
                 "DOS-", ""
@@ -352,7 +396,7 @@ def plot_dos(calc_dir):
                 zorder=zorder_value,
             )
 
-        ax.set_ylim(-6, 2)
+        ax.set_ylim(emin, emax)
         ax.set_xlim(0, max_y + buffer)
         dos_ticks = get_nonzero_integer_ticks(0, max_y + buffer, n_ticks=4)
         if dos_ticks:
@@ -398,7 +442,12 @@ def plot_dos(calc_dir):
 
         plt.tight_layout()
 
+        # save_path = None
         output_filename = f"DOS{'' if include_e else '_without_E'}.png"
+        if "csv" in calc_dir.split(os.sep):
+            save_path = os.sep.join(calc_dir.split(os.sep)[:-1])
+            save_path = os.path.join(save_path, "plots")
+            output_filename = os.path.join(save_path, output_filename)
 
         plt.savefig(output_filename, dpi=300)
         print(f"\t\tSaving  {output_filename}")
