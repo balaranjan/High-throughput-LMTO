@@ -5,6 +5,7 @@ from math import ceil
 import pandas as pd
 import os
 import numpy as np
+import argparse
 import glob
 import re
 
@@ -407,7 +408,51 @@ def plot_dos(calc_dir):
     plot(include_e=False)
 
 
-def plot_band_structure(calc_dir):
+def rescale_band_str():
+
+    parser = argparse.ArgumentParser(
+        description="Rescale and plot the band \
+            structure within a specified energy range."
+    )
+
+    parser.add_argument(
+        "calc_dir",
+        type=str,
+        help="Path to the calculation directory containing \
+            'band_structure.csv' and 'band_structure_points.csv' \
+                (and optionally a 'plots' subdirectory).",
+    )
+
+    parser.add_argument(
+        "emin",
+        type=float,
+        default=-3.9,
+        help="Minimum energy limit for the y-axis (in eV). Default: -3.9",
+    )
+
+    parser.add_argument(
+        "emax",
+        type=float,
+        default=3.9,
+        help="Maximum energy limit for the y-axis (in eV). Default: 3.9",
+    )
+
+    args = parser.parse_args()
+
+    calc_dir, emin, emax = args.calc_dir, args.emin, args.emax
+    if calc_dir == ".":
+        calc_dir = os.getcwd()
+    if "plots" in os.listdir(calc_dir):
+        plot_band_structure(f"{calc_dir}{os.sep}csv", emin, emax)
+    else:
+        for _calc in os.listdir(calc_dir):
+            _calc = os.path.join(calc_dir, _calc)
+            if not os.path.isdir(_calc):
+                continue
+            plot_band_structure(os.path.join(_calc, "csv"), emin, emax)
+
+
+def plot_band_structure(calc_dir, emin=-3.9, emax=3.9):
     try:
         points_file = os.path.join(calc_dir, "band_structure_points.csv")
         band_file = os.path.join(calc_dir, "band_structure.csv")
@@ -461,7 +506,7 @@ def plot_band_structure(calc_dir):
 
         ax.set_title("Band Structure", fontsize=20, pad=10)
         ax.set_xlim(x_min, x_max)
-        ax.set_ylim(-3.9, 3.9)
+        ax.set_ylim(emin, emax)
         ax.axhline(0, color="black", linewidth=1.5, linestyle="--", zorder=1)
 
         x_position = ax.get_xlim()[1]
@@ -486,7 +531,13 @@ def plot_band_structure(calc_dir):
 
         plt.tight_layout()
 
-        save_path = "Bandstructure.png"
+        if "csv" in calc_dir.split(os.sep):
+            calc_dir = os.sep.join(calc_dir.split(os.sep)[:-1])
+            save_path = os.path.join(calc_dir, "plots")
+            save_path = f"{save_path}{os.sep}Bandstructure.png"
+
+        else:
+            save_path = "Bandstructure.png"
         plt.savefig(save_path, dpi=300, bbox_inches="tight")
 
         print(f"\t\tSaving {save_path}")
@@ -527,6 +578,10 @@ def plot_cohps(calc_dir, plot_icohp=True):
                 header=None,
                 names=["energy", "cohp", "int_cohp"],
             )
+            cohp_data = cohp_data[
+                (cohp_data["energy"] >= -6.0) & (cohp_data["energy"] <= 2.0)
+            ]
+
             pair = (
                 os.path.basename(cohp_file)
                 .replace("data.cohp", "")
@@ -548,7 +603,7 @@ def plot_cohps(calc_dir, plot_icohp=True):
                 color=color,
                 linewidth=5,
             )
-            energies = cohp_data["energy"].values
+            # energies = cohp_data["energy"].values
             all_x_values.append(np.abs(cohp_data["cohp"].values).max())
 
             # Plot ICOHP (dashed, no legend)
@@ -561,13 +616,7 @@ def plot_cohps(calc_dir, plot_icohp=True):
                     linestyle="--",
                     zorder=0,
                 )
-                all_x_values.append(
-                    np.abs(
-                        cohp_data["int_cohp"].values[
-                            np.logical_and(energies >= -2.0, energies <= 6.0)
-                        ]
-                    ).max()
-                )
+                all_x_values.append(np.abs(cohp_data["int_cohp"].values).max())
 
         # Set axis limits and style to match DOS plot
         ax.set_ylim(-6, 2)
@@ -598,8 +647,10 @@ def plot_cohps(calc_dir, plot_icohp=True):
             frameon=False,
             fontsize=30,
             loc="lower left",
-            handlelength=0.75,
+            handlelength=0.5,
             columnspacing=0.1,
+            handletextpad=0.5,
+            bbox_to_anchor=(-0.05, 0.0),
         )
         legend.set_zorder(99)
 
@@ -654,8 +705,7 @@ def read_cohp_data(site1, site2, d, count):
     names = [
         name
         for name in os.listdir(".")
-        if (f"data.site_cohp_{site1}_{site2}_{count}" in name)
-        or (f"data.site_cohp_{site2}_{site1}_{count}" in name)
+        if f"data.site_cohp_{site1}_{site2}_{count}" in name
     ]
     names = sorted(names, key=lambda name: abs(float(name.split("_")[-1]) - d))
     # name = names[0]

@@ -87,10 +87,16 @@ def create_word_table(site_conns, pair_cohp_vals, sample_name="SAMPLE_NAME"):
         header_row.cells[3].paragraphs[0], [["d", "it-bold"], [" (Å)", "bold"]]
     )
     add_mixed_text(
-        header_row.cells[4].paragraphs[0], [["-COHP (per atom)", "bold"]]
+        header_row.cells[4].paragraphs[0],
+        [
+            ["-COHP at ", "bold"],
+            ["E", "bold-it"],
+            ["F", "bold-sub"],
+            ["\n (per bond)", "bold"],
+        ],
     )
     add_mixed_text(
-        header_row.cells[5].paragraphs[0], [["-ICOHP (per atom)", "bold"]]
+        header_row.cells[5].paragraphs[0], [["-ICOHP \n(per bond)", "bold"]]
     )
 
     for i in range(6):
@@ -100,22 +106,25 @@ def create_word_table(site_conns, pair_cohp_vals, sample_name="SAMPLE_NAME"):
     i = 0
     for site, neighbors in condensed_dict.items():
         cohp_sum = []
-        first_row = None
+        # third_row = None
         for j, entry in enumerate(neighbors):
             target_row_idx = i + 1
-            col_offset = 0
             row = table.rows[target_row_idx]
 
             if j == 0:
-                first_row = row  # row.cells[0 + col_offset].text = str(site)
+                row.cells[0].text = str(site)
             if j == 1:
-                row.cells[0 + col_offset].text = "CN " + str(
+                row.cells[0].text = "CN " + str(
                     sum([v[-1] for v in neighbors])
                 )
-            row.cells[1 + col_offset].text = str(entry[0])
-            row.cells[2 + col_offset].text = f"{entry[2]}\u00d7"
-            row.cells[3 + col_offset].text = str(entry[1])
+            # if j == 2:
+            #     third_row = row
+            row.cells[1].text = str(entry[0])
+            row.cells[2].text = f"{entry[2]}\u00d7"
+            row.cells[3].text = str(entry[1])
 
+            # since site names may mismatch,
+            # use the distance to find the closest
             val = [
                 (v["cohp_val"], v["icohp_val"], abs(v["d"] - entry[1]))
                 for v in pair_cohp_vals
@@ -125,13 +134,13 @@ def create_word_table(site_conns, pair_cohp_vals, sample_name="SAMPLE_NAME"):
             val = sorted(val, key=lambda x: x[1])
             val = val[0]
 
-            cohp_sum.append(round(val[0], 2))
+            cohp_sum.append(round(val[1], 2))
 
-            row.cells[4 + col_offset].text = f"{val[0]/entry[2]:2.2f}"
-            row.cells[5 + col_offset].text = f"{val[1]/entry[2]:2.2f}"
+            row.cells[4].text = f"{val[0]/entry[2]:2.2f}"
+            row.cells[5].text = f"{val[1]/entry[2]:2.2f}"
             i += 1
 
-        first_row.cells[0 + col_offset].text = f"{site} ({sum(cohp_sum):.2f})"
+        # third_row.cells[0].text = f"{sum(cohp_sum)/2:.2f}"
         # B.O. = sum of icohp, wighted
 
     doc.save("cohp.docx")

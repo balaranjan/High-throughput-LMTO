@@ -263,8 +263,8 @@ def calc_COHPs(cifpath, site_data, sample_name):
         if not element1_sites:
             continue
 
-        ind_el1 = elements.index(element1)
-        for element2 in elements[ind_el1:]:
+        # ind_el1 = elements.index(element1)
+        for element2 in elements:
             element2_sites = class_dict[element2]
             if not len(element2_sites):
                 continue

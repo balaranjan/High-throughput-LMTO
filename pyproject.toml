@@ -9,6 +9,7 @@ dynamic=['dependencies']
 
 [project.scripts]
 htlmto = "htlmto.cli:main"
+rescale-bandstr = "htlmto.plotting:rescale_band_str"
 
 [tool.setuptools.packages.find]
 where = ["src"]  # list of folders that contain the packages (["."] by default)
