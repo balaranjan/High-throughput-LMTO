@@ -23,8 +23,6 @@ from .lmto_helper_functions import group_cohps
 from .plotting import plot_dos
 from .plotting import plot_cohps
 from .plotting import plot_band_structure
-from .plotting import plot_site_COHPs
-from .table import create_word_table
 
 
 @print_progress_to_console
@@ -225,7 +223,7 @@ def run_lmbnd():
     return [error]
 
 
-def calc_COHPs(cifpath, site_data, sample_name):
+def calc_COHPs(cifpath, site_data):
     ctrl = read_ctrl()
 
     class_dict = defaultdict(list)
@@ -237,11 +235,10 @@ def calc_COHPs(cifpath, site_data, sample_name):
         if el == "E":
             continue
         class_dict[el].append([site, i])
+        # sites.append([site, i])
 
     try:
-        max_distances, cn_conns, label_map = get_distances_from_cifkit(
-            cifpath, site_data
-        )
+        max_distances, cn_conns = get_distances_from_cifkit(cifpath, site_data)
     except Exception as e:
         print("\tError getting max distances")
         print(e)
@@ -263,8 +260,8 @@ def calc_COHPs(cifpath, site_data, sample_name):
         if not element1_sites:
             continue
 
-        # ind_el1 = elements.index(element1)
-        for element2 in elements:
+        ind_el1 = elements.index(element1)
+        for element2 in elements[ind_el1:]:
             element2_sites = class_dict[element2]
             if not len(element2_sites):
                 continue
@@ -328,46 +325,33 @@ def calc_COHPs(cifpath, site_data, sample_name):
                 if not error and not no_cohp_found:
                     shutil.copy("COHP", f"cohp_{element1}_{element2}")
                     pairs = process_COHP()
-                    if os.path.isfile("DATA.COHP"):
-                        shutil.move(
-                            "DATA.COHP", f"data.cohp_{element1}_{element2}"
-                        )
                     pairs = parse_classes(pairs)
 
                     if pairs:
                         groups = group_cohps(pairs)
-
-                        for site_pair_dist, classes in groups.items():
-                            cohp_val = process_COHP(" ".join(classes))
-                            s1, s2, d = site_pair_dist.split("-")
-                            # s1 = label_map[s1]
-                            # s2 = label_map[s2]
-                            d = float(d)
-
-                            all_pairs.append(
-                                {
-                                    "s1": s1,
-                                    "s2": s2,
-                                    "count": len(classes),
-                                    "d": d,
-                                    "cohp_val": cohp_val[0],
-                                    "icohp_val": cohp_val[1],
-                                }
-                            )
-                            if os.path.isfile("DATA.COHP"):
-                                shutil.move(
-                                    "DATA.COHP",
-                                    f"data.site_cohp_{s1}_{s2}_{len(classes)}_{d}",  # noqa: E501
+                        for s2, values in groups.items():
+                            for d, classes in values.items():
+                                cohp_val = process_COHP(" ".join(classes))
+                                all_pairs.append(
+                                    {
+                                        "s1": site1,
+                                        "s2": s2,
+                                        "count": len(classes),
+                                        "d": d,
+                                        "cohp_val": cohp_val[0],
+                                        "icohp_val": cohp_val[1],
+                                    }
                                 )
 
+                    if os.path.isfile("DATA.COHP"):
+                        shutil.move(
+                            "DATA.COHP", f"data.cohp_{element1}_{element2}"
+                        )
+
     if not error:
-        plot_cohps(".", plot_icohp=True)
-        plot_cohps(".", plot_icohp=False)
-        plot_site_COHPs(cn_conns, label_map, plot_icohp=True)
-        plot_site_COHPs(cn_conns, label_map, plot_icohp=False)
+        plot_cohps(".")
 
     convert_cohp_files_to_csv()
-    create_word_table(cn_conns, all_pairs, sample_name)
 
     return error
 
@@ -430,7 +414,7 @@ def run_lmto(**kwargs):
     5. Run lm.run until it converges.
     """
 
-    print(f"Name: {kwargs['formula']}")
+    print(f"Name: {kwargs['name']}")
 
     # create dir
     name = f"{kwargs['name']}"
@@ -555,9 +539,7 @@ def run_lmto(**kwargs):
     plot_band_structure(".")
 
     # COHP
-    error_cohp = calc_COHPs(
-        kwargs["cif_path"], kwargs["atom_site_data"], kwargs["formula"]
-    )
+    error_cohp = calc_COHPs(kwargs["cif_path"], kwargs["atom_site_data"])
 
     cleanup()
 
