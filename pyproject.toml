@@ -4,13 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "htlmto"
-version = "0.0.1"
+version = "2026.6.12"
 dynamic=['dependencies']
 
 [project.scripts]
 htlmto = "htlmto.cli:main"
-rescale-bandstr = "htlmto.plotting:rescale_band_str"
-rescale-dos = "htlmto.plotting:rescale_dos"
+plot-bandstr = "htlmto.plotting:rescale_band_str"
+plot-dos = "htlmto.plotting:rescale_dos"
+plot-cohp="htlmto.plotting:interactive_cohp_plot"
 
 [tool.setuptools.packages.find]
 where = ["src"]  # list of folders that contain the packages (["."] by default)

@@ -7,7 +7,10 @@ import os
 import numpy as np
 import argparse
 import glob
+import sys
 import re
+import traceback
+import matplotlib.colors as mcolors
 
 # Define transition metals
 transition_metals = [
@@ -596,7 +599,16 @@ def plot_band_structure(calc_dir, emin=-3.9, emax=3.9):
         print(e)
 
 
-def plot_cohps(calc_dir, plot_icohp=True):
+def interactive_cohp_plot():
+
+    calc_dir = sys.argv[1]
+    if os.path.isdir(os.path.join(calc_dir, "calculation")):
+        calc_dir = os.path.join(calc_dir, "calculation")
+        plots_dir = os.path.join(calc_dir, "plots")
+    else:
+        plots_dir = os.path.join(calc_dir, "../plots")
+        os.makedirs(plots_dir, exist_ok=True)
+
     try:
         cohp_files = [
             os.path.join(calc_dir, f)
@@ -606,6 +618,252 @@ def plot_cohps(calc_dir, plot_icohp=True):
         if not cohp_files:
             print("COHP file not found in:", os.getcwd())
             return
+
+        pairs = {}
+        for cohp in cohp_files:
+            pair = "-".join(sorted(cohp.split("_")[-2:]))
+            pairs[pair] = cohp
+
+        keys = list(pairs.keys())
+        colors = [
+            "red",
+            "orange",
+            "green",
+            "blue",
+            "purple",
+            "pink",
+            "aqua",
+            "black",
+            "aquamarine",
+            "beige",
+            "blueviolet",
+            "brown",
+            "chocolate",
+            "coral",
+            "cyan",
+            "darkblue",
+            "darkcyan",
+            "darkgoldenrod",
+            "darkgray",
+            "darkgreen",
+            "darkgrey",
+            "darkmagenta",
+            "darkorange",
+            "darkorchid",
+            "darkred",
+            "darksalmon",
+            "darkseagreen",
+            "darkviolet",
+            "fuchsia",
+            "gold",
+            "greenyellow",
+            "indigo",
+            "ivory",
+            "khaki",
+            "lavender",
+            "lime",
+            "magenta",
+            "maroon",
+            "navy",
+            "oldlace",
+            "olive",
+            "orchid",
+            "peru",
+            "pink",
+            "plum",
+            "silver",
+            "tan",
+            "teal",
+            "tomato",
+            "violet",
+            "yellow",
+            "yellowgreen",
+        ]
+
+        print("COHP for the following element pairs are available.")
+        print(f"{0:<2} {'all'}")
+        for i, pair in enumerate(keys, 1):
+            print(f"{i:<2} {pair} {colors[(i-1) % len(colors)]}")
+
+        selected = False
+        selection_map = {}  # Stores {pair_key: color}
+
+        while not selected:
+            raw_input_str = input(
+                "Select the numbers corresponding to the pairs to plot \
+                    (separated by comma), or 0 for all. "
+                "\nTo change color, enter 'index-color' (e.g., '1-red'): "
+            )
+
+            if raw_input_str.strip() == "0":
+                # Plot all pairs with default cyclic colors
+                selection_map = {
+                    k: colors[(i - 1) % len(colors)]
+                    for i, k in enumerate(keys, 1)
+                }
+                selected = True
+                continue
+
+            parts = [p.strip() for p in raw_input_str.split(",") if p.strip()]
+            temp_selection = {}
+            is_valid = True
+
+            for part in parts:
+                # Check if color is specified (format: "N-color")
+                if "-" in part:
+                    idx_str, color_name = part.rsplit("-", 1)
+                else:
+                    idx_str = part
+                    color_name = None
+
+                try:
+                    idx = int(idx_str)
+                except ValueError:
+                    print(f"Error: '{idx_str}' is not a valid number.")
+                    is_valid = False
+                    break
+
+                if idx < 1 or idx > len(keys):
+                    print(
+                        f"Error: Index {idx} is out of range (1-{len(keys)})."
+                    )
+                    is_valid = False
+                    break
+
+                # Validate color if provided
+                if color_name is not None:
+                    if color_name not in colors and not mcolors.is_color_like(
+                        color_name
+                    ):
+                        print(
+                            f"Error: '{color_name}' \
+                                is not a recognized color. \
+                            Use one from the list or a valid \
+                                CSS/matplotlib color."
+                        )
+                        is_valid = False
+                        break
+                    temp_selection[keys[idx - 1]] = color_name
+                else:
+                    # Default color assignment based on index
+                    temp_selection[keys[idx - 1]] = colors[
+                        (idx - 1) % len(colors)
+                    ]
+
+            if is_valid and temp_selection:
+                selection_map = temp_selection
+                selected = True
+            elif not is_valid:
+                print("Invalid input. Please try again.\n")
+            else:
+                print("No valid pairs selected. Please try again.\n")
+
+        # Prepare data for plotting function
+        final_pairs_to_plot = []
+        final_colors = []
+
+        if 0 in [
+            k.split("-")[0] for k in selection_map.keys()
+        ]:  # Check if 'all' was logic handled earlier,
+            # but strictly we map keys now
+            pass  # Already handled above
+
+        for pair_key, color in selection_map.items():
+            final_pairs_to_plot.append(pair_key)
+            final_colors.append(color)
+
+        print(f"Selected pairs: {final_pairs_to_plot}")
+        print(f"Assigned colors: {final_colors}")
+
+        selected_files = [pairs[k] for k in final_pairs_to_plot if k in pairs]
+
+        if not selected_files:
+            print("No files selected.")
+            return
+
+        lw, lwi = 5.0, 3.0
+        print(f"The linewidth for COHP is {lw} and for iCOHP it is {lwi}.")
+        valid = False
+        while not valid:
+            try:
+                value = input(
+                    "Enter new widths for \
+                        COHP, iCOHP (seaprated \
+                            by comma, \
+                                enter 0 to accept defaults): "
+                )
+                if value.strip() == "0":
+                    valid = True
+                if "," in value:
+                    lw, lwi = [float(v.strip()) for v in value.split(",")]
+                    valid = True
+                else:
+                    lw = float(value.strip())
+                    lwi = 0
+                    valid = True
+            except Exception as e:
+                print("Invalid input. Please try again.\n")
+                print(e)
+
+        emin, emax = -6.0, 2.0
+        print(f"The emin, emax for COHP are {emin} and {emax}.")
+        valid = False
+        while not valid:
+            try:
+                value = input(
+                    "Enter new emin, emax \
+                        (seaprated by comma, enter 0 to accept defaults): "
+                )
+                if value.strip() == "0":
+                    valid = True
+                elif "," in valid:
+                    emin, emax = [float(v.strip()) for v in valid.split(",")]
+                    valid = True
+                else:
+                    print("Invalid input. Please try again.\n")
+            except Exception as e:
+                print("Invalid input. Please try again.\n")
+                print(e)
+
+        plot_cohps(
+            calc_dir,
+            plot_icohp=lwi,
+            cohp_files=[pairs[pair] for pair in final_pairs_to_plot],
+            colors=final_colors,
+            lw=lw,
+            lwi=lwi,
+            emin=emin,
+            emax=emax,
+        )
+
+    except Exception as e:
+        print("Error in interactive selection.")
+        print(e)
+        print(traceback.format_exc())
+
+    return
+
+
+def plot_cohps(
+    calc_dir,
+    plot_icohp=True,
+    cohp_files=None,
+    colors=None,
+    lw=5.0,
+    lwi=3.0,
+    emin=-6.0,
+    emax=2.0,
+):
+    try:
+        if cohp_files is None:
+            cohp_files = [
+                os.path.join(calc_dir, f)
+                for f in os.listdir(calc_dir)
+                if f.lower().startswith("data.cohp")
+            ]
+            if not cohp_files:
+                print("COHP file not found in:", os.getcwd())
+                return
 
         plt.rcParams.update(
             {
@@ -617,7 +875,62 @@ def plot_cohps(calc_dir, plot_icohp=True):
         )
 
         fig, ax = plt.subplots(figsize=(8, 15))
-        color_cycle = ["red", "orange", "green", "blue", "purple", "pink"]
+        color_cycle = [
+            "red",
+            "orange",
+            "green",
+            "blue",
+            "purple",
+            "pink",
+            "aqua",
+            "black",
+            "aquamarine",
+            "beige",
+            "blueviolet",
+            "brown",
+            "chocolate",
+            "coral",
+            "cyan",
+            "darkblue",
+            "darkcyan",
+            "darkgoldenrod",
+            "darkgray",
+            "darkgreen",
+            "darkgrey",
+            "darkmagenta",
+            "darkorange",
+            "darkorchid",
+            "darkred",
+            "darksalmon",
+            "darkseagreen",
+            "darkviolet",
+            "fuchsia",
+            "gold",
+            "greenyellow",
+            "indigo",
+            "ivory",
+            "khaki",
+            "lavender",
+            "lime",
+            "magenta",
+            "maroon",
+            "navy",
+            "oldlace",
+            "olive",
+            "orchid",
+            "peru",
+            "pink",
+            "plum",
+            "silver",
+            "tan",
+            "teal",
+            "tomato",
+            "violet",
+            "yellow",
+            "yellowgreen",
+        ]
+        if colors:
+            color_cycle = colors
 
         all_x_values = []
         for idx, cohp_file in enumerate(cohp_files):
@@ -628,7 +941,7 @@ def plot_cohps(calc_dir, plot_icohp=True):
                 names=["energy", "cohp", "int_cohp"],
             )
             cohp_data = cohp_data[
-                (cohp_data["energy"] >= -6.0) & (cohp_data["energy"] <= 2.0)
+                (cohp_data["energy"] >= emin) & (cohp_data["energy"] <= emax)
             ]
 
             pair = (
@@ -650,25 +963,25 @@ def plot_cohps(calc_dir, plot_icohp=True):
                 cohp_data["energy"],
                 label=pair,
                 color=color,
-                linewidth=5,
+                linewidth=lw,
             )
             # energies = cohp_data["energy"].values
             all_x_values.append(np.abs(cohp_data["cohp"].values).max())
 
             # Plot ICOHP (dashed, no legend)
-            if plot_icohp:
+            if plot_icohp and lwi:
                 ax.plot(
                     cohp_data["int_cohp"],
                     cohp_data["energy"],
                     color=color,
-                    linewidth=3,
+                    linewidth=lwi,
                     linestyle="--",
                     zorder=0,
                 )
                 all_x_values.append(np.abs(cohp_data["int_cohp"].values).max())
 
         # Set axis limits and style to match DOS plot
-        ax.set_ylim(-6, 2)
+        ax.set_ylim(emin, emax)
         max_x = max(all_x_values) if all_x_values else 1
         if plot_icohp:
             buffer = 0.05 * max_x
@@ -680,8 +993,8 @@ def plot_cohps(calc_dir, plot_icohp=True):
         )
         if cohp_ticks:
             ax.set_xticks(cohp_ticks)
-        ax.axhline(0, color="black", linestyle="--", linewidth=3)
-        ax.axvline(0, color="black", linestyle="--", linewidth=3)
+        ax.axhline(0, color="black", linestyle="--", linewidth=lwi)
+        ax.axvline(0, color="black", linestyle="--", linewidth=lwi)
         ax.tick_params(axis="x", labelsize=35, width=3, length=10)
         ax.tick_params(axis="y", labelsize=35, width=3, length=10)
 
