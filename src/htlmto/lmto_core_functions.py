@@ -4,7 +4,9 @@ import subprocess
 import pandas as pd
 import shutil
 from collections import defaultdict
-from .cif_reader.base import _parse_formula
+
+# from .cif_reader.base import _parse_formula
+from cif_reader.base import _parse_formula
 from .utilities import print_progress_to_console
 from .utilities import get_distances_from_cifkit
 from .utilities import convert_cohp_files_to_csv

@@ -2,7 +2,9 @@ import numpy as np
 import pandas as pd
 from collections import defaultdict
 from cifkit import Cif
-from .cif_reader import read_cif
+
+# from .cif_reader import read_cif
+from cif_reader import read_cif
 import shutil
 import os
 
@@ -97,7 +99,7 @@ def extract_data_from_cif(cif_path):
         elif abs(int(v) - v) == 0.0:
             ordered_formula += f"{int(v)}"
         else:
-            ordered_formula += f"{str(float(v)):.2f}"
+            ordered_formula += f"{float(v):.2f}"
 
     cell = cif.cell
 
