@@ -2,7 +2,9 @@ import numpy as np
 import pandas as pd
 from collections import defaultdict
 from cifkit import Cif
-from .cif_reader import read_cif
+
+# from .cif_reader import read_cif
+from cif_reader import read_cif
 import shutil
 import os
 
@@ -63,22 +65,21 @@ def get_distances_from_cifkit(cifpath, site_data):
                 label_map[point[-1]] = site["label"]
 
     max_distances = defaultdict(dict)
-    # {site: {site1: d1, site2: d2, ...}, site2: {}, ...}
     conns = cif.connections
     cn_conns = {}
     for k, v in conns.items():
 
         cn = get_d_by_dmin_CN(v)
         v = sorted([p[:2] for p in v], key=lambda x: x[1])[:cn]
-        cn_conns[k] = v
+        cn_conns[label_map[k]] = [(label_map[_v[0]], _v[1]) for _v in v]
+
         for _site in set([_v[0] for _v in v]):
             neigh_d_w_site_label = [_v[1] for _v in v if _v[0] == _site]
-            # print(k, _site, max(neigh_d_w_site_label), neigh_d_w_site_label)
             max_distances[label_map[k]][label_map[_site]] = (
                 max(neigh_d_w_site_label) * 1.10
             )
 
-    return max_distances, cn_conns
+    return max_distances, cn_conns, label_map
 
 
 def extract_data_from_cif(cif_path):
@@ -88,6 +89,17 @@ def extract_data_from_cif(cif_path):
 
     if not cif:
         return
+
+    formula_dict = cif.formula_dict
+    ordered_formula = ""
+    for k, v in formula_dict.items():
+        ordered_formula += f"{k}"
+        if v == 1:
+            pass
+        elif abs(int(v) - v) == 0.0:
+            ordered_formula += f"{int(v)}"
+        else:
+            ordered_formula += f"{float(v):.2f}"
 
     cell = cif.cell
 
@@ -108,6 +120,7 @@ def extract_data_from_cif(cif_path):
         "atom_site_data": cif.site_data,
         "num_atoms": cif.num_atoms,
         "name": name,
+        "formula": ordered_formula,
     }
 
     return data
@@ -138,19 +151,26 @@ def cleanup():
     4. calculation - rest of the files
     """
 
-    file_types = [".csv", ".png", ".log"]
+    file_type_map = {
+        "csv": "csv",
+        "docx": "csv",
+        "png": "plots",
+        "log": "logs",
+    }  # [["csv", "docx"], ["png"], ["log"]]
     files = os.listdir(".")
 
-    for sub_dir_name, file_type in zip(["csv", "plots", "logs"], file_types):
-        os.mkdir(sub_dir_name)
+    for sdir in ["csv", "plots", "logs"]:
+        os.mkdir(sdir)
 
-        for _file in files:
-            if _file.endswith(file_type):
-                shutil.move(_file, f"{sub_dir_name}{os.sep}{_file}")
+    for _file in files:
+        ext = _file.split(".")[-1]
+        if ext not in file_type_map:
+            continue
+        shutil.move(_file, f"{file_type_map[ext]}{os.sep}{_file}")
 
     os.mkdir("calculation")
     for _file in files:
-        if not _file[-4:] in file_types:
+        if os.path.isfile(_file):
             shutil.move(_file, f"calculation{os.sep}{_file}")
 
 

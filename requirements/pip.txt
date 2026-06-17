@@ -3,3 +3,4 @@ matplotlib
 pandas
 pexpect
 cifkit
+cif-reader @ git+https://github.com/balaranjan/cif_reader.git
