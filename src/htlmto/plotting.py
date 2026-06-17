@@ -786,15 +786,14 @@ def interactive_cohp_plot():
         valid = False
         while not valid:
             try:
-                value = input(
-                    "Enter new widths for \
-                        COHP, iCOHP (seaprated \
-                            by comma, \
-                                enter 0 to accept defaults): "
+                prompt = (
+                    "Enter new widths for COHP, iCOHP "
+                    "seaprated by comma, enter 0 to accept defaults): "
                 )
+                value = input(prompt)
                 if value.strip() == "0":
                     valid = True
-                if "," in value:
+                elif "," in value:
                     lw, lwi = [float(v.strip()) for v in value.split(",")]
                     valid = True
                 else:
@@ -816,13 +815,14 @@ def interactive_cohp_plot():
                 )
                 if value.strip() == "0":
                     valid = True
-                elif "," in valid:
-                    emin, emax = [float(v.strip()) for v in valid.split(",")]
+                elif "," in value:
+                    emin, emax = [float(v.strip()) for v in value.split(",")]
                     valid = True
                 else:
                     print("Invalid input. Please try again.\n")
             except Exception as e:
                 print("Invalid input. Please try again.\n")
+                print(valid, value)
                 print(e)
 
         plot_cohps(
@@ -1048,6 +1048,7 @@ def plot_cohps(
     except Exception as e:
         print("Error while plotting COHP.")
         print(e)
+        print(traceback.format_exc())
 
 
 def group_neighbors(cn_conns):
