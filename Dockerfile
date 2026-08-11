@@ -34,12 +34,11 @@ RUN cd bin && \
 # Add bin to PATH in .bashrc
 RUN echo 'export PATH="$HOME/bin:$PATH"' >> .bashrc
 
-# Install Miniconda
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh && \
-    bash miniconda.sh -b -p /home/lmto/miniconda && \
-    rm miniconda.sh
+# Install Miniforge instead of Miniconda
+RUN wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh -O miniforge.sh && \
+    bash miniforge.sh -b -p /home/lmto/miniconda && \
+    rm miniforge.sh
 
-# Initialize conda and setup environment
 ENV PATH="/home/lmto/miniconda/bin:$PATH"
 RUN conda init bash && \
     conda create -n lmto_env python=3.12 -y && \
