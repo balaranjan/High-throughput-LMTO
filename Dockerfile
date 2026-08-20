@@ -1,40 +1,34 @@
 FROM ubuntu:20.04
 
-# Avoid interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install system dependencies
+# Install system dependencies + gosu
 RUN apt-get update && \
-    apt-get install -y build-essential gfortran sudo git wget && \
+    apt-get install -y build-essential gfortran sudo git wget gosu && \
     rm -rf /var/lib/apt/lists/*
 
-# Create user 'lmto' with password 'lmto'
+# Create user 'lmto'
 RUN useradd -m -s /bin/bash lmto && \
     echo "lmto:lmto" | chpasswd && \
     adduser lmto sudo
 
-# Create data exchange directory (accessible via bind mount)
+# Create calculations directory owned by lmto
 RUN mkdir -p /home/lmto/lmto_calculations && \
     chown -R lmto:lmto /home/lmto/lmto_calculations
 
-# Switch to user context
 USER lmto
 WORKDIR /home/lmto
 
-# Create bin directory for source code
+# Build LMTO binary
 RUN mkdir -p bin
-
-# Copy and extract source code (replace USER_DEFINED_PATH with actual path)
 COPY --chown=lmto:lmto source.tar.gz bin/source.tar.gz
 RUN cd bin && \
     tar -xzf source.tar.gz --strip-components=1 && \
     rm source.tar.gz && \
     make all
-
-# Add bin to PATH in .bashrc
 RUN echo 'export PATH="$HOME/bin:$PATH"' >> .bashrc
 
-# Install Miniforge instead of Miniconda
+# Install Miniforge
 RUN wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh -O miniforge.sh && \
     bash miniforge.sh -b -p /home/lmto/miniconda && \
     rm miniforge.sh
@@ -44,11 +38,15 @@ RUN conda init bash && \
     conda create -n lmto_env python=3.12 -y && \
     echo "conda activate lmto_env" >> .bashrc
 
-# Clone repository and install package
+# Install htlmto
 RUN git clone https://github.com/balaranjan/High-throughput-LMTO.git && \
     cd High-throughput-LMTO && \
     /home/lmto/miniconda/envs/lmto_env/bin/pip install .
 
-# Set default command
-CMD ["/bin/bash"]
+# Entrypoint runs as root, fixes permissions, then drops to lmto
+USER root
+RUN printf '#!/bin/bash\nchown -R lmto:lmto /home/lmto/lmto_calculations\nexec gosu lmto /bin/bash --login\n' \
+    > /entrypoint.sh && chmod +x /entrypoint.sh
+
 WORKDIR /home/lmto/lmto_calculations
+ENTRYPOINT ["/entrypoint.sh"]
